@@ -6,7 +6,7 @@
   <link href="https://coolling.github.io/atom.xml" rel="self"/>
   
   <link href="https://coolling.github.io/"/>
-  <updated>2024-03-17T09:03:40.090Z</updated>
+  <updated>2024-03-17T13:05:12.137Z</updated>
   <id>https://coolling.github.io/</id>
   
   <author>
@@ -15,6 +15,34 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>ppopp23-SWIFT: Expedited Failure Recovery for Large-scale DNN Training</title>
+    <link href="https://coolling.github.io/2024/03/17/ppopp23-SWIFT-Expedited-Failure-Recovery-for-Large-scale-DNN-Training/"/>
+    <id>https://coolling.github.io/2024/03/17/ppopp23-SWIFT-Expedited-Failure-Recovery-for-Large-scale-DNN-Training/</id>
+    <published>2024-03-17T12:42:06.000Z</published>
+    <updated>2024-03-17T13:05:12.137Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="SWIFT-Expedited-Failure-Recovery-for-Large-scale-DNN-Training"><a href="#SWIFT-Expedited-Failure-Recovery-for-Large-scale-DNN-Training" class="headerlink" title="SWIFT: Expedited Failure Recovery for Large-scale DNN Training"></a>SWIFT: Expedited Failure Recovery for Large-scale DNN Training</h1><p>PPoPP’23</p><p>SWIFT 不是制作模型状态的额外副本，而是解决由故障引起的模型状态的不一致，并利用数据并行性中的模型状态副本进行故障恢复。对于流水线并行，提出了一种基于日志记录的方法，该方法记录中间数据并重播计算以在发生故障时恢复丢失的状态。</p><p><strong>问题：</strong>目前的检查点方法需要进行一个快照操作—将模型状态保存在内存—-减慢训练速度，内存成本高</p><p><strong>解决：</strong></p><p>1.数据并行发生故障时，有的机器已经完成了参数更新，机器之间状态不一致—崩溃一致性问题</p><p>发现：模型状态更新的许多优化器在数学上是可逆的。</p><p>通过<strong>撤消</strong>参数的更新来将幸存worker的模型状态恢复到一致状态，用幸存worker中模型状态的副本进行恢复</p><p>2.对于流水线并行</p><p>使用日志，记录机器间通信数据，异步执行日志记录，将数据存储在后台。</p><p>发生故障时，检索日志数据并重播计算。</p><p>可以将日志数据传播给幸存worker，让他们协助恢复。</p><p>以及进一步利用worker的空闲时间（即管道并行性中的冒泡时间）来进行日志记录。</p><p>使用分组来减少记录的日志量</p><h2 id="SWIFT"><a href="#SWIFT" class="headerlink" title="SWIFT"></a>SWIFT</h2><p>a.模型并行—使用副本恢复</p><p>b.流水线并行—使用基于日志的恢复【流水线并行中的通信数据量远小于数据并行和模型并行；数据并行和模型并行使用集合通信，管道并行是点对点通信，比较简单】</p><p>c.以上都不满足，仅使用全局检查点</p><p>当检测到故障：</p><p>1.替换机器</p><p>2.幸存worker使用更新撤销解决模型状态不一致问题</p><p>3.执行恢复替换失败的worker</p><p>基于副本的恢复：幸存worker将模型状态广播给新worker</p><p>基于日志的恢复：替换worker加载最新的检查点，然后根据日志数据重新计算丢失的迭代，直到恢复到故障前的迭代</p><h2 id="更新撤销"><a href="#更新撤销" class="headerlink" title="更新撤销"></a>更新撤销</h2><p>优化器的许多更新运算符在数学上是可逆的，即对于运算符 f ，存在一个逆运算符 f -1 可以撤销 f 的操作。</p><p><img src="/../images/swift-1.png" alt="img"></p><h2 id="基于日志记录的恢复"><a href="#基于日志记录的恢复" class="headerlink" title="基于日志记录的恢复"></a>基于日志记录的恢复</h2><p>机器故障比单GPU故障更常见，因此我们不记录机器内的 GPU 到 GPU 的通信，<strong>而只记录机器间的通信</strong>，从而大大减少了日志记录开销</p><p>a.记录什么数据？</p><p>要记录的数据包括<strong>前向传递中的中间激活和后向传递中的梯度</strong>。<strong>要记录一些元数据，包括发送者和接收者以及时间戳</strong>（其中包含当前训练迭代和当前正在训练的微批次的标识符）</p><p>b.怎么记录数据</p><p>发送者记录消息，在后台异步记录它。为每个worker设置一个队列。在训练期间，工作线程不断将传出张量推入队列，而另一个后台线程不断从队列中读取张量并进行日志记录。</p><p>c.日志记录开销怎么办</p><p>同步流水线并行训练中，存在许多气泡，期间工作线程处于空闲状态，这是记录日志的理想时间。</p><p>一旦日志数据传输到CPU，GPU上的数据就可以安全地删除，不会导致 GPU 上大量数据积累</p><p><img src="/../images/swift-2.png" alt="img"></p><p>d.如何恢复</p><p><img src="/../images/swift-3.png" alt="img"></p><p>前一个worker先将未记录的日志数据记录到cpu，然后写入disk，然后上传到全局存储；新机器将其所需的日志文件从全局存储下载到本地磁盘，加载最新的检查点，并按照时间戳的确切顺序重播之前从日志文件接收到的张量</p><p>【<strong>恢复范围仅限于故障机器上的本地计算图，而不是整个计算图，从而加快了恢复速度。</strong>】</p><p>e.垃圾收集</p><p>所有早期的日志文件在全局检查点之后都会被废弃，并且垃圾会被收集，因为系统可以直接加载最新的检查点。尽管日志记录大小随着迭代次数的增加而增加，但由于定期全局检查点，该大小是有上限的。因此，全局检查点的频率决定了日志记录大小的上限。</p><p>f.并行恢复</p><p>利用幸存的worker来协助恢复的worker。所有worker（包括替代worker和幸存worker）都会检索日志文件并拥有故障机器计算图的副本。每个worker从日志文件中读取不同微批次的日志数据，并将它们作为输入重新计算梯度，与计算其他微批次的其他worker同步梯度，然后执行模型更新。这样，多个worker可以并行地为故障机器重新计算微批次，从而加速恢复</p><p><img src="/../images/swift-4.png" alt="img"></p><p>替代worker从最新的检查点加载模型状态并将其状态广播给幸存的worker，所有worker从全局存储下载日志文件，选择相应微批次的日志数据进行重新计算。恢复后，幸存的worker加载其检查点以恢复其原始模型参数和优化器状态</p><p>g.选择性记录</p><p>记录所有跨机器消息可能会消耗大量存储空间。通过选择性日志记录来研究存储空间和恢复时间之间的权衡。</p><p><strong>将机器分组并记录组间通信，但不记录组内通信</strong>。我们可以将原始方法视为一种特殊情况，其中每台机器形成一个组。如果组中的一台机器发生故障，则整个组机器的训练需要从最新的检查点回滚，因为我们不记录组内通信。</p><p>选择性日志记录以恢复时间换取空间开销。</p><p><strong>考虑到日志数据的存储容量限制，我们如何对机器进行分组以最小化故障恢复时间？</strong></p><p>1.分析了每个组 Gi 的平均每次迭代计算时间 R(Gi)</p><p>2.对于每对相邻组,获得它们之间每次迭代的传输大小</p><p>3.在存储容量限制 Mmax、网络带宽 B 和检查点间隔 T的情况下，我们的目标是找到一个组配置 G &#x3D; {G1,…。 。 。 , Gk} 最小化总体恢复时间 R</p><p>4.推断合并之后总体恢复时间 R 和总体空间开销 M 的变化</p><p>5.迭代地合并具有最小 ΔR&#x2F;ΔM 的两个相邻组，直到总体空间消耗小于 Mmax。（<strong>最小化每单位存储空间减少而增加的恢复时间</strong>）其中M（G）表示日志数据所需的总体存储空间</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;SWIFT-Expedited-Failure-Recovery-for-Large-scale-DNN-Training&quot;&gt;&lt;a href=&quot;#SWIFT-Expedited-Failure-Recovery-for-Large-scale-DNN-Traini</summary>
+      
+    
+    
+    
+    <category term="论文阅读" scheme="https://coolling.github.io/categories/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB/"/>
+    
+    
+    <category term="故障恢复" scheme="https://coolling.github.io/tags/%E6%95%85%E9%9A%9C%E6%81%A2%E5%A4%8D/"/>
+    
+    <category term="PPoPP" scheme="https://coolling.github.io/tags/PPoPP/"/>
+    
+    <category term="23年" scheme="https://coolling.github.io/tags/23%E5%B9%B4/"/>
+    
+  </entry>
   
   <entry>
     <title>310.最小高度树</title>
@@ -38,9 +66,9 @@
     
     <category term="每日一题" scheme="https://coolling.github.io/tags/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/"/>
     
-    <category term="bfs" scheme="https://coolling.github.io/tags/bfs/"/>
-    
     <category term="中等" scheme="https://coolling.github.io/tags/%E4%B8%AD%E7%AD%89/"/>
+    
+    <category term="bfs" scheme="https://coolling.github.io/tags/bfs/"/>
     
     <category term="树" scheme="https://coolling.github.io/tags/%E6%A0%91/"/>
     
@@ -68,11 +96,11 @@
     
     <category term="每日一题" scheme="https://coolling.github.io/tags/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/"/>
     
+    <category term="中等" scheme="https://coolling.github.io/tags/%E4%B8%AD%E7%AD%89/"/>
+    
     <category term="动态规划" scheme="https://coolling.github.io/tags/%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/"/>
     
     <category term="bfs" scheme="https://coolling.github.io/tags/bfs/"/>
-    
-    <category term="中等" scheme="https://coolling.github.io/tags/%E4%B8%AD%E7%AD%89/"/>
     
   </entry>
   
@@ -98,9 +126,9 @@
     
     <category term="每日一题" scheme="https://coolling.github.io/tags/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/"/>
     
-    <category term="中等" scheme="https://coolling.github.io/tags/%E4%B8%AD%E7%AD%89/"/>
-    
     <category term="贪心" scheme="https://coolling.github.io/tags/%E8%B4%AA%E5%BF%83/"/>
+    
+    <category term="中等" scheme="https://coolling.github.io/tags/%E4%B8%AD%E7%AD%89/"/>
     
   </entry>
   
