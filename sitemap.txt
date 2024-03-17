@@ -1,10 +1,10 @@
-https://coolling.github.io/2024/03/17/ppopp23-SWIFT-Expedited-Failure-Recovery-for-Large-scale-DNN-Training/
 https://coolling.github.io/2024/03/17/310-%E6%9C%80%E5%B0%8F%E9%AB%98%E5%BA%A6%E6%A0%91/
 https://coolling.github.io/2024/03/16/2684-%E7%9F%A9%E9%98%B5%E4%B8%AD%E7%A7%BB%E5%8A%A8%E7%9A%84%E6%9C%80%E5%A4%A7%E6%AC%A1%E6%95%B0/
+https://coolling.github.io/2024/03/14/2789-%E5%90%88%E5%B9%B6%E5%90%8E%E6%95%B0%E7%BB%84%E4%B8%AD%E7%9A%84%E6%9C%80%E5%A4%A7%E5%85%83%E7%B4%A0/
+https://coolling.github.io/2024/03/13/%E6%9C%80%E5%A4%A7%E4%BA%8C%E8%BF%9B%E5%88%B6%E5%A5%87%E6%95%B0/
+https://coolling.github.io/2024/03/17/ppopp23-SWIFT-Expedited-Failure-Recovery-for-Large-scale-DNN-Training/
 https://coolling.github.io/about/index.html
 https://coolling.github.io/link/index.html
-https://coolling.github.io/2024/03/13/%E6%9C%80%E5%A4%A7%E4%BA%8C%E8%BF%9B%E5%88%B6%E5%A5%87%E6%95%B0/
-https://coolling.github.io/2024/03/14/2789-%E5%90%88%E5%B9%B6%E5%90%8E%E6%95%B0%E7%BB%84%E4%B8%AD%E7%9A%84%E6%9C%80%E5%A4%A7%E5%85%83%E7%B4%A0/
 https://coolling.github.io/tags/index.html
 https://coolling.github.io/music/index.html
 https://coolling.github.io/movies/index.html
@@ -12,10 +12,10 @@ https://coolling.github.io/categories/index.html
 https://coolling.github.io/2024/03/13/hello-world/
 https://coolling.github.io/
 https://coolling.github.io/tags/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/
-https://coolling.github.io/tags/%E8%B4%AA%E5%BF%83/
-https://coolling.github.io/tags/%E4%B8%AD%E7%AD%89/
 https://coolling.github.io/tags/%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/
 https://coolling.github.io/tags/bfs/
+https://coolling.github.io/tags/%E4%B8%AD%E7%AD%89/
+https://coolling.github.io/tags/%E8%B4%AA%E5%BF%83/
 https://coolling.github.io/tags/%E6%A0%91/
 https://coolling.github.io/tags/%E6%95%85%E9%9A%9C%E6%81%A2%E5%A4%8D/
 https://coolling.github.io/tags/PPoPP/
