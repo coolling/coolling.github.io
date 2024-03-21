@@ -6,7 +6,7 @@
   <link href="https://coolling.github.io/atom.xml" rel="self"/>
   
   <link href="https://coolling.github.io/"/>
-  <updated>2024-03-21T04:58:50.446Z</updated>
+  <updated>2024-03-21T12:31:18.694Z</updated>
   <id>https://coolling.github.io/</id>
   
   <author>
@@ -15,6 +15,36 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>ICCD23-LightCheck</title>
+    <link href="https://coolling.github.io/2024/03/21/ICCD23-LightCheck/"/>
+    <id>https://coolling.github.io/2024/03/21/ICCD23-LightCheck/</id>
+    <published>2024-03-21T12:25:21.000Z</published>
+    <updated>2024-03-21T12:31:18.694Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="LightCheck：A-Cost-Efﬁcient-Failure-Tolerant-Scheme-for-Distributed-DNN-Training"><a href="#LightCheck：A-Cost-Efﬁcient-Failure-Tolerant-Scheme-for-Distributed-DNN-Training" class="headerlink" title="LightCheck：A Cost-Efﬁcient Failure-Tolerant Scheme for Distributed DNN Training"></a>LightCheck：A Cost-Efﬁcient Failure-Tolerant Scheme for Distributed DNN Training</h1><p>ICCD23</p><p>为了减少检查点开销，我们通过逐层管道化检查点来利用细粒度异步检查点。</p><p>为了进一步减少检查点延迟，我们利用软件-硬件协同设计方法，通过持久内存 (PM) 管理器将新硬件设备合并到我们的检查点系统中。</p><h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>检查点在复制模型状态时需要阻塞训练—&gt;开销高</p><p>CheckFreq—-&gt;未能充分利用分布式DNN训练中计算、通信和检查点之间的并行性<br><img src="/../images/LightCheck/lightcheck-1.png" alt="checkfreq"></p><blockquote><p>整个模型状态一次连续复制</p><p>CheckFreq没有充分探究训练过程中的数据依赖性</p></blockquote><h2 id="提出"><a href="#提出" class="headerlink" title="提出"></a>提出</h2><p>LightCheck：为分布式 DNN 训练提供了低开销的频繁检查点。</p><p>a.LightCheck 以逐层方式将检查点与计算和通信进行管道化，从而减轻检查点对训练性能的影响。</p><p>b.有效地结合了PM的直接访问（DAX）功能和统一虚拟寻址（UVA）技术，将PM映射到GPU虚拟地址空间，从而允许从GPU直接访问PM。</p><p>c.进一步使用 CUDA流和事件通过 GPU 计算重叠 GPU-PM 数据传输。</p><p>d.为了提高 PM 写入吞吐量，LightCheck 将 PM 中张量元数据和张量数据的存储分开，从而使张量数据访问在小量写入时连续，在大量写入时对齐。</p><h2 id="LightCheck"><a href="#LightCheck" class="headerlink" title="LightCheck"></a>LightCheck</h2><p>由两个主要组件组成，包括高效的检查点方案和持久内存PM管理器</p><h3 id="检查点方案"><a href="#检查点方案" class="headerlink" title="检查点方案"></a><strong>检查点方案</strong></h3><blockquote><p>根据分布式训练过程中模型训练和检查点之间的数据依赖关系，异步checkpoint模型状态的最新更新部分</p></blockquote><p><strong>策略选择</strong></p><p>有三种不同的检查点策略，包括LightCheck-G、LightCheck-C和LightCheck-D</p><p>LightCheck-G:复制副本到GPU内存；从GPU内存写入PM【最小的快照时间；高GPU内存消耗】</p><p>LightCheck-C:复制副本到CPU内存；从CPU内存写入PM【干扰CPU中的运行进程】</p><p>LightCheck-D:直接将模型状态从GPU内存逐层传输到PM【PM带宽低；复杂的性能特征】【<strong>仔细地将检查点数据写入PM以充分利用PM带宽！</strong>】</p><p><strong>异步逐层检查点</strong><br><img src="/../images/LightCheck/lightcheck-2.png" alt="lightcheck"></p><p>将检查点与计算和通信进行管道化，以将检查点嵌入到训练数据流中。当某一层的梯度同步和参数更新完成后，该层的检查点就准备开始了。将检查点操作放入 FIFO 队列中，并使用后台线程异步执行它。</p><h3 id="持久内存管理器"><a href="#持久内存管理器" class="headerlink" title="持久内存管理器"></a><strong>持久内存管理器</strong></h3><blockquote><p>通过将PM映射到GPU虚拟内存空间并组织PM中检查点数据的存储位置，实现GPU内存和持久内存之间的有效数据传输。</p></blockquote><p><strong>三种技术</strong></p><p>a.直接内存访问 (DMA) 技术：它利用固定缓冲区作为主机内存和 GPU 内存之间数据传输的暂存区域</p><p>PM 的 DAX 功能：将 PM 直接映射到 CPU 地址空间</p><blockquote><p>可以通过 DMA 数据路径通过 cudaMemcpy API 在 PM 和 GPU 内存之间传输数据</p><p><strong>然而，通过DMA数据路径传输数据仍然需要经过CPU内存中的固定缓冲区，从而阻碍了传输性能。</strong></p></blockquote><p>b.统一内存（UM）技术，它进一步在全局内存地址空间中管理设备和主机内存，并自动在PM和GPU内存之间迁移内存页面。</p><blockquote><p>简化了编程，<strong>但仍然需要隐式页面迁移，这很难扩展统一内存以包含PM。</strong></p></blockquote><p>c.统一虚拟寻址（UVA）技术，它可以使用全局内存地址空间通过 PCIe 进行零拷贝访问</p><p>将PM映射到GPU虚拟地址空间</p><blockquote><p>该技术允许GPU内核在将PM映射到GPU虚拟地址空间后直接访问PM。</p><p><strong>与DMA和UM相比，UVA技术具有高性能并提高了易用性。</strong></p></blockquote><p>因此，我们使用 UVA 技术在 LightCheck 中的 PM 和 GPU 内存之间传输数据。</p><p>内存复制是通过使用后台线程在额外的 CUDA 流上执行的。</p><p>此外，由于训练需要检查检查点过程是否完成，LightCheck 通过 CUDA 事件监控 GPU-PM 内存复制的进度。</p><h3 id="检查点存储管理"><a href="#检查点存储管理" class="headerlink" title="检查点存储管理"></a>检查点存储管理</h3><p>对于检查点，除了张量元数据和一些附加状态（例如当前epoch、当前迭代和训练数据索引）之外，几乎所有数据都是以张量格式构造的</p><p>一般来说，检查点数据以字典的形式组织。在 PM 中复制和维护数据结构以匹配用于加载模型状态的训练框架接口（即load_state_dict()）非常重要。</p><blockquote><p>然而，由于 PM 对小随机写入敏感，因此通过 PCIe 接口的 GPU-PM 访问需要与 128 字节粒度保持一致，以实现更好的 PCIe 带宽利用率。</p><p>未对齐的访问会生成两个单独的 PCIe 请求，导致高 PM 写放大。</p></blockquote><p>LightCheck将检查点数据空间划分为数据映射区域和连续张量区域。</p><p>a.数据映射由PM中张量数据的地址和张量数据的字节数组成。</p><p>PM 中存储的数据映射可供所有 GPU 和 CPU 访问。基于UVA技术，PM中的每个张量都有一个供所有GPU和CPU使用的全局虚拟地址，处理器可以直接将张量写入PM中的相应位置。</p><p>在检查点文件初始化期间，LightCheck 分配 PM 空间并为张量创建数据映射。在PM中分配空间时，LightCheck按照访问顺序连续存储小张量数据，并在连续张量数据区域中以对齐的 PCIe 粒度为大于 128 字节的张量顺序分配内存。</p><blockquote><p>得益于分离的检查点存储管理，LightCheck可以显着缓解PM写入放大，并减少从GPU内存向PM写入检查点所需的PCIe请求数量。</p></blockquote><p>另外，LightCheck 仅为训练模型维护两个检查点数据映射。一旦一个检查点完成，另一个检查点就会被废弃。</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;LightCheck：A-Cost-Efﬁcient-Failure-Tolerant-Scheme-for-Distributed-DNN-Training&quot;&gt;&lt;a href=&quot;#LightCheck：A-Cost-Efﬁcient-Failure-Tolera</summary>
+      
+    
+    
+    
+    <category term="论文阅读" scheme="https://coolling.github.io/categories/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB/"/>
+    
+    
+    <category term="故障恢复" scheme="https://coolling.github.io/tags/%E6%95%85%E9%9A%9C%E6%81%A2%E5%A4%8D/"/>
+    
+    <category term="ICCD" scheme="https://coolling.github.io/tags/ICCD/"/>
+    
+    <category term="23年" scheme="https://coolling.github.io/tags/23%E5%B9%B4/"/>
+    
+    <category term="检查点" scheme="https://coolling.github.io/tags/%E6%A3%80%E6%9F%A5%E7%82%B9/"/>
+    
+  </entry>
   
   <entry>
     <title>2671.频率跟踪器</title>
@@ -105,7 +135,7 @@
     <link href="https://coolling.github.io/2024/03/17/ppopp23-SWIFT-Expedited-Failure-Recovery-for-Large-scale-DNN-Training/"/>
     <id>https://coolling.github.io/2024/03/17/ppopp23-SWIFT-Expedited-Failure-Recovery-for-Large-scale-DNN-Training/</id>
     <published>2024-03-17T12:42:06.000Z</published>
-    <updated>2024-03-17T13:17:13.665Z</updated>
+    <updated>2024-03-21T12:26:04.251Z</updated>
     
     <content type="html"><![CDATA[<h1 id="SWIFT-Expedited-Failure-Recovery-for-Large-scale-DNN-Training"><a href="#SWIFT-Expedited-Failure-Recovery-for-Large-scale-DNN-Training" class="headerlink" title="SWIFT: Expedited Failure Recovery for Large-scale DNN Training"></a>SWIFT: Expedited Failure Recovery for Large-scale DNN Training</h1><p>PPoPP’23</p><p>SWIFT 不是制作模型状态的额外副本，而是解决由故障引起的模型状态的不一致，并利用数据并行性中的模型状态副本进行故障恢复。对于流水线并行，提出了一种基于日志记录的方法，该方法记录中间数据并重播计算以在发生故障时恢复丢失的状态。</p><p><strong>问题：</strong>目前的检查点方法需要进行一个快照操作—将模型状态保存在内存—-减慢训练速度，内存成本高</p><p><strong>解决：</strong></p><p>1.数据并行发生故障时，有的机器已经完成了参数更新，机器之间状态不一致—崩溃一致性问题</p><p>发现：模型状态更新的许多优化器在数学上是可逆的。</p><p>通过<strong>撤消</strong>参数的更新来将幸存worker的模型状态恢复到一致状态，用幸存worker中模型状态的副本进行恢复</p><p>2.对于流水线并行</p><p>使用日志，记录机器间通信数据，异步执行日志记录，将数据存储在后台。</p><p>发生故障时，检索日志数据并重播计算。</p><p>可以将日志数据传播给幸存worker，让他们协助恢复。</p><p>以及进一步利用worker的空闲时间（即管道并行性中的冒泡时间）来进行日志记录。</p><p>使用分组来减少记录的日志量</p><h2 id="SWIFT"><a href="#SWIFT" class="headerlink" title="SWIFT"></a>SWIFT</h2><p>a.模型并行—使用副本恢复</p><p>b.流水线并行—使用基于日志的恢复【流水线并行中的通信数据量远小于数据并行和模型并行；数据并行和模型并行使用集合通信，管道并行是点对点通信，比较简单】</p><p>c.以上都不满足，仅使用全局检查点</p><p>当检测到故障：</p><p>1.替换机器</p><p>2.幸存worker使用更新撤销解决模型状态不一致问题</p><p>3.执行恢复替换失败的worker</p><p>基于副本的恢复：幸存worker将模型状态广播给新worker</p><p>基于日志的恢复：替换worker加载最新的检查点，然后根据日志数据重新计算丢失的迭代，直到恢复到故障前的迭代</p><h2 id="更新撤销"><a href="#更新撤销" class="headerlink" title="更新撤销"></a>更新撤销</h2><p>优化器的许多更新运算符在数学上是可逆的，即对于运算符 f ，存在一个逆运算符 f -1 可以撤销 f 的操作。</p><p><img src="/../images/swift/swift-1.png" alt="img"></p><h2 id="基于日志记录的恢复"><a href="#基于日志记录的恢复" class="headerlink" title="基于日志记录的恢复"></a>基于日志记录的恢复</h2><p>机器故障比单GPU故障更常见，因此我们不记录机器内的 GPU 到 GPU 的通信，<strong>而只记录机器间的通信</strong>，从而大大减少了日志记录开销</p><p>a.记录什么数据？</p><p>要记录的数据包括<strong>前向传递中的中间激活和后向传递中的梯度</strong>。<strong>要记录一些元数据，包括发送者和接收者以及时间戳</strong>（其中包含当前训练迭代和当前正在训练的微批次的标识符）</p><p>b.怎么记录数据</p><p>发送者记录消息，在后台异步记录它。为每个worker设置一个队列。在训练期间，工作线程不断将传出张量推入队列，而另一个后台线程不断从队列中读取张量并进行日志记录。</p><p>c.日志记录开销怎么办</p><p>同步流水线并行训练中，存在许多气泡，期间工作线程处于空闲状态，这是记录日志的理想时间。</p><p>一旦日志数据传输到CPU，GPU上的数据就可以安全地删除，不会导致 GPU 上大量数据积累</p><p><img src="/../images/swift/swift-2.png" alt="img"></p><p>d.如何恢复</p><p><img src="/../images/swift/swift-3.png" alt="img"></p><p>前一个worker先将未记录的日志数据记录到cpu，然后写入disk，然后上传到全局存储；新机器将其所需的日志文件从全局存储下载到本地磁盘，加载最新的检查点，并按照时间戳的确切顺序重播之前从日志文件接收到的张量</p><p>【<strong>恢复范围仅限于故障机器上的本地计算图，而不是整个计算图，从而加快了恢复速度。</strong>】</p><p>e.垃圾收集</p><p>所有早期的日志文件在全局检查点之后都会被废弃，并且垃圾会被收集，因为系统可以直接加载最新的检查点。尽管日志记录大小随着迭代次数的增加而增加，但由于定期全局检查点，该大小是有上限的。因此，全局检查点的频率决定了日志记录大小的上限。</p><p>f.并行恢复</p><p>利用幸存的worker来协助恢复的worker。所有worker（包括替代worker和幸存worker）都会检索日志文件并拥有故障机器计算图的副本。每个worker从日志文件中读取不同微批次的日志数据，并将它们作为输入重新计算梯度，与计算其他微批次的其他worker同步梯度，然后执行模型更新。这样，多个worker可以并行地为故障机器重新计算微批次，从而加速恢复</p><p><img src="/../images/swift/swift-4.png" alt="img"></p><p>替代worker从最新的检查点加载模型状态并将其状态广播给幸存的worker，所有worker从全局存储下载日志文件，选择相应微批次的日志数据进行重新计算。恢复后，幸存的worker加载其检查点以恢复其原始模型参数和优化器状态</p><p>g.选择性记录</p><p>记录所有跨机器消息可能会消耗大量存储空间。通过选择性日志记录来研究存储空间和恢复时间之间的权衡。</p><p><strong>将机器分组并记录组间通信，但不记录组内通信</strong>。我们可以将原始方法视为一种特殊情况，其中每台机器形成一个组。如果组中的一台机器发生故障，则整个组机器的训练需要从最新的检查点回滚，因为我们不记录组内通信。</p><p>选择性日志记录以恢复时间换取空间开销。</p><p><strong>考虑到日志数据的存储容量限制，我们如何对机器进行分组以最小化故障恢复时间？</strong></p><p>1.分析了每个组 Gi 的平均每次迭代计算时间 R(Gi)</p><p>2.对于每对相邻组,获得它们之间每次迭代的传输大小</p><p>3.在存储容量限制 Mmax、网络带宽 B 和检查点间隔 T的情况下，我们的目标是找到一个组配置 G &#x3D; {G1,…。 。 。 , Gk} 最小化总体恢复时间 R</p><p>4.推断合并之后总体恢复时间 R 和总体空间开销 M 的变化</p><p>5.迭代地合并具有最小 ΔR&#x2F;ΔM 的两个相邻组，直到总体空间消耗小于 Mmax。（<strong>最小化每单位存储空间减少而增加的恢复时间</strong>）其中M（G）表示日志数据所需的总体存储空间</p>]]></content>
     
@@ -122,9 +152,11 @@
     
     <category term="故障恢复" scheme="https://coolling.github.io/tags/%E6%95%85%E9%9A%9C%E6%81%A2%E5%A4%8D/"/>
     
+    <category term="23年" scheme="https://coolling.github.io/tags/23%E5%B9%B4/"/>
+    
     <category term="PPoPP" scheme="https://coolling.github.io/tags/PPoPP/"/>
     
-    <category term="23年" scheme="https://coolling.github.io/tags/23%E5%B9%B4/"/>
+    <category term="日志" scheme="https://coolling.github.io/tags/%E6%97%A5%E5%BF%97/"/>
     
   </entry>
   
