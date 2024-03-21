@@ -6,7 +6,7 @@
   <link href="https://coolling.github.io/atom.xml" rel="self"/>
   
   <link href="https://coolling.github.io/"/>
-  <updated>2024-03-19T09:05:05.414Z</updated>
+  <updated>2024-03-21T04:58:50.446Z</updated>
   <id>https://coolling.github.io/</id>
   
   <author>
@@ -15,6 +15,34 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>2671.频率跟踪器</title>
+    <link href="https://coolling.github.io/2024/03/21/2671-%E9%A2%91%E7%8E%87%E8%B7%9F%E8%B8%AA%E5%99%A8/"/>
+    <id>https://coolling.github.io/2024/03/21/2671-%E9%A2%91%E7%8E%87%E8%B7%9F%E8%B8%AA%E5%99%A8/</id>
+    <published>2024-03-21T04:47:01.000Z</published>
+    <updated>2024-03-21T04:58:50.446Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="1793-好子数组的最大分数"><a href="#1793-好子数组的最大分数" class="headerlink" title="1793. 好子数组的最大分数"></a>1793. 好子数组的最大分数</h2><h3 id="题目："><a href="#题目：" class="headerlink" title="题目："></a>题目：</h3><p>请你设计并实现一个能够对其中的值进行跟踪的数据结构，并支持对频率相关查询进行应答。</p><p>实现 <code>FrequencyTracker</code> 类：</p><ul><li><code>FrequencyTracker()</code>：使用一个空数组初始化 <code>FrequencyTracker</code> 对象。</li><li><code>void add(int number)</code>：添加一个 <code>number</code> 到数据结构中。</li><li><code>void deleteOne(int number)</code>：从数据结构中删除一个 <code>number</code> 。数据结构 <strong>可能不包含</strong> <code>number</code> ，在这种情况下不删除任何内容。</li><li><code>bool hasFrequency(int frequency)</code>: 如果数据结构中存在出现 <code>frequency</code> 次的数字，则返回 <code>true</code>，否则返回 <code>false</code>。</li></ul><p><strong>示例 1：</strong></p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">输入</span><br><span class="line">[&quot;FrequencyTracker&quot;, &quot;add&quot;, &quot;add&quot;, &quot;hasFrequency&quot;]</span><br><span class="line">[[], [3], [3], [2]]</span><br><span class="line">输出</span><br><span class="line">[null, null, null, true]</span><br><span class="line"></span><br><span class="line">解释</span><br><span class="line">FrequencyTracker frequencyTracker = new FrequencyTracker();</span><br><span class="line">frequencyTracker.add(3); // 数据结构现在包含 [3]</span><br><span class="line">frequencyTracker.add(3); // 数据结构现在包含 [3, 3]</span><br><span class="line">frequencyTracker.hasFrequency(2); // 返回 true ，因为 3 出现 2 次</span><br></pre></td></tr></table></figure><p><strong>示例 2：</strong></p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">输入</span><br><span class="line">[&quot;FrequencyTracker&quot;, &quot;add&quot;, &quot;deleteOne&quot;, &quot;hasFrequency&quot;]</span><br><span class="line">[[], [1], [1], [1]]</span><br><span class="line">输出</span><br><span class="line">[null, null, null, false]</span><br><span class="line"></span><br><span class="line">解释</span><br><span class="line">FrequencyTracker frequencyTracker = new FrequencyTracker();</span><br><span class="line">frequencyTracker.add(1); // 数据结构现在包含 [1]</span><br><span class="line">frequencyTracker.deleteOne(1); // 数据结构现在为空 []</span><br><span class="line">frequencyTracker.hasFrequency(1); // 返回 false ，因为数据结构为空</span><br></pre></td></tr></table></figure><p><strong>示例 3：</strong></p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">输入</span><br><span class="line">[&quot;FrequencyTracker&quot;, &quot;hasFrequency&quot;, &quot;add&quot;, &quot;hasFrequency&quot;]</span><br><span class="line">[[], [2], [3], [1]]</span><br><span class="line">输出</span><br><span class="line">[null, false, null, true]</span><br><span class="line"></span><br><span class="line">解释</span><br><span class="line">FrequencyTracker frequencyTracker = new FrequencyTracker();</span><br><span class="line">frequencyTracker.hasFrequency(2); // 返回 false ，因为数据结构为空</span><br><span class="line">frequencyTracker.add(3); // 数据结构现在包含 [3]</span><br><span class="line">frequencyTracker.hasFrequency(1); // 返回 true ，因为 3 出现 1 次</span><br></pre></td></tr></table></figure><p><strong>提示：</strong></p><ul><li><code>1 &lt;= number &lt;= 105</code></li><li><code>1 &lt;= frequency &lt;= 105</code></li><li>最多调用 <code>add</code>、<code>deleteOne</code> 和 <code>hasFrequency</code> <strong>共计</strong> <code>2 * 105</code> 次</li></ul><h3 id="解题思路"><a href="#解题思路" class="headerlink" title="解题思路"></a>解题思路</h3><p>这个题目第一眼看是用map，做了一半之后发现是用数组……但其实用数组也是一样的，用两个数组，一个数字映射对应的频率，一个是频率映射对应的数字。</p><p>发现语法好多不会勒，忘了初始化的时候数组中不为0，要自己初始化</p><h3 id="答案"><a href="#答案" class="headerlink" title="答案"></a>答案</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">FrequencyTracker</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="type">int</span> num[<span class="number">100001</span>] ;</span><br><span class="line">    <span class="type">int</span> frequencys[<span class="number">100001</span>] ;</span><br><span class="line">    <span class="built_in">FrequencyTracker</span>() &#123;</span><br><span class="line">       <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;<span class="number">100001</span>;i++)&#123;</span><br><span class="line">        num[i]=<span class="number">0</span>;</span><br><span class="line">        frequencys[i]=<span class="number">0</span>;</span><br><span class="line">       &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">add</span><span class="params">(<span class="type">int</span> number)</span> </span>&#123;</span><br><span class="line">        frequencys[num[number]]--;</span><br><span class="line">        num[number]++;</span><br><span class="line">        frequencys[num[number]]++;</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">deleteOne</span><span class="params">(<span class="type">int</span> number)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(num[number]&gt;<span class="number">0</span>)&#123;</span><br><span class="line">            frequencys[num[number]]--;</span><br><span class="line">            num[number]--;</span><br><span class="line">            frequencys[num[number]]++;</span><br><span class="line">            </span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">hasFrequency</span><span class="params">(<span class="type">int</span> frequency)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> frequencys[frequency]&gt;<span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h2 id=&quot;1793-好子数组的最大分数&quot;&gt;&lt;a href=&quot;#1793-好子数组的最大分数&quot; class=&quot;headerlink&quot; title=&quot;1793. 好子数组的最大分数&quot;&gt;&lt;/a&gt;1793. 好子数组的最大分数&lt;/h2&gt;&lt;h3 id=&quot;题目：&quot;&gt;&lt;a href=&quot;#</summary>
+      
+    
+    
+    
+    <category term="算法" scheme="https://coolling.github.io/categories/%E7%AE%97%E6%B3%95/"/>
+    
+    
+    <category term="每日一题" scheme="https://coolling.github.io/tags/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/"/>
+    
+    <category term="中等" scheme="https://coolling.github.io/tags/%E4%B8%AD%E7%AD%89/"/>
+    
+    <category term="哈希" scheme="https://coolling.github.io/tags/%E5%93%88%E5%B8%8C/"/>
+    
+  </entry>
   
   <entry>
     <title>1793. 好子数组的最大分数</title>
@@ -122,9 +150,9 @@
     
     <category term="每日一题" scheme="https://coolling.github.io/tags/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/"/>
     
-    <category term="bfs" scheme="https://coolling.github.io/tags/bfs/"/>
-    
     <category term="中等" scheme="https://coolling.github.io/tags/%E4%B8%AD%E7%AD%89/"/>
+    
+    <category term="bfs" scheme="https://coolling.github.io/tags/bfs/"/>
     
     <category term="树" scheme="https://coolling.github.io/tags/%E6%A0%91/"/>
     
@@ -152,11 +180,11 @@
     
     <category term="每日一题" scheme="https://coolling.github.io/tags/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/"/>
     
+    <category term="中等" scheme="https://coolling.github.io/tags/%E4%B8%AD%E7%AD%89/"/>
+    
     <category term="动态规划" scheme="https://coolling.github.io/tags/%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/"/>
     
     <category term="bfs" scheme="https://coolling.github.io/tags/bfs/"/>
-    
-    <category term="中等" scheme="https://coolling.github.io/tags/%E4%B8%AD%E7%AD%89/"/>
     
   </entry>
   
