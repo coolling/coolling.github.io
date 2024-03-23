@@ -6,7 +6,7 @@
   <link href="https://coolling.github.io/atom.xml" rel="self"/>
   
   <link href="https://coolling.github.io/"/>
-  <updated>2024-03-21T12:31:18.694Z</updated>
+  <updated>2024-03-23T06:26:54.979Z</updated>
   <id>https://coolling.github.io/</id>
   
   <author>
@@ -15,6 +15,34 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>2549. 统计桌面上的不同数字</title>
+    <link href="https://coolling.github.io/2024/03/23/2549-%E7%BB%9F%E8%AE%A1%E6%A1%8C%E9%9D%A2%E4%B8%8A%E7%9A%84%E4%B8%8D%E5%90%8C%E6%95%B0%E5%AD%97/"/>
+    <id>https://coolling.github.io/2024/03/23/2549-%E7%BB%9F%E8%AE%A1%E6%A1%8C%E9%9D%A2%E4%B8%8A%E7%9A%84%E4%B8%8D%E5%90%8C%E6%95%B0%E5%AD%97/</id>
+    <published>2024-03-23T06:20:30.000Z</published>
+    <updated>2024-03-23T06:26:54.979Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="2549-统计桌面上的不同数字"><a href="#2549-统计桌面上的不同数字" class="headerlink" title="2549. 统计桌面上的不同数字"></a>2549. 统计桌面上的不同数字</h2><h3 id="题目："><a href="#题目：" class="headerlink" title="题目："></a>题目：</h3><p>给你一个正整数 <code>n</code> ，开始时，它放在桌面上。在 <code>109</code> 天内，每天都要执行下述步骤：</p><ul><li>对于出现在桌面上的每个数字 <code>x</code> ，找出符合 <code>1 &lt;= i &lt;= n</code> 且满足 <code>x % i == 1</code> 的所有数字 <code>i</code> 。</li><li>然后，将这些数字放在桌面上。</li></ul><p>返回在 <code>109</code> 天之后，出现在桌面上的 <strong>不同</strong> 整数的数目。</p><p><strong>注意：</strong></p><ul><li>一旦数字放在桌面上，则会一直保留直到结束。</li><li><code>%</code> 表示取余运算。例如，<code>14 % 3</code> 等于 <code>2</code> 。</li></ul><p><strong>示例 1：</strong></p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">输入：n = 5</span><br><span class="line">输出：4</span><br><span class="line">解释：最开始，5 在桌面上。 </span><br><span class="line">第二天，2 和 4 也出现在桌面上，因为 5 % 2 == 1 且 5 % 4 == 1 。 </span><br><span class="line">再过一天 3 也出现在桌面上，因为 4 % 3 == 1 。 </span><br><span class="line">在十亿天结束时，桌面上的不同数字有 2 、3 、4 、5 。</span><br></pre></td></tr></table></figure><p><strong>示例 2：</strong></p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">输入：n = 3 </span><br><span class="line">输出：2</span><br><span class="line">解释： </span><br><span class="line">因为 3 % 2 == 1 ，2 也出现在桌面上。 </span><br><span class="line">在十亿天结束时，桌面上的不同数字只有两个：2 和 3 。 </span><br></pre></td></tr></table></figure><p><strong>提示：</strong></p><ul><li><code>1 &lt;= n &lt;= 100</code></li></ul><h3 id="解题思路"><a href="#解题思路" class="headerlink" title="解题思路"></a>解题思路</h3><ol><li>这道题是个简单题，一开始想着的是求每个出现在桌子上的数-1之后的因子，因为n最大就100，暴力解决</li><li>后来想想，不对，n一定会生成n-1，n-1之后会生成n-2 …..一直到生成2，这样实际上就是会有n-1个不同的数</li></ol><h3 id="答案"><a href="#答案" class="headerlink" title="答案"></a>答案</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">distinctIntegers</span><span class="params">(<span class="type">int</span> n)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(n==<span class="number">1</span>)</span><br><span class="line">            <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            <span class="keyword">return</span> n<span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br></pre></td></tr></table></figure>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h2 id=&quot;2549-统计桌面上的不同数字&quot;&gt;&lt;a href=&quot;#2549-统计桌面上的不同数字&quot; class=&quot;headerlink&quot; title=&quot;2549. 统计桌面上的不同数字&quot;&gt;&lt;/a&gt;2549. 统计桌面上的不同数字&lt;/h2&gt;&lt;h3 id=&quot;题目：&quot;&gt;&lt;a hre</summary>
+      
+    
+    
+    
+    <category term="算法" scheme="https://coolling.github.io/categories/%E7%AE%97%E6%B3%95/"/>
+    
+    
+    <category term="每日一题" scheme="https://coolling.github.io/tags/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/"/>
+    
+    <category term="数学" scheme="https://coolling.github.io/tags/%E6%95%B0%E5%AD%A6/"/>
+    
+    <category term="简单" scheme="https://coolling.github.io/tags/%E7%AE%80%E5%8D%95/"/>
+    
+  </entry>
   
   <entry>
     <title>ICCD23-LightCheck</title>
@@ -270,9 +298,9 @@
     
     <category term="每日一题" scheme="https://coolling.github.io/tags/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/"/>
     
-    <category term="贪心" scheme="https://coolling.github.io/tags/%E8%B4%AA%E5%BF%83/"/>
-    
     <category term="简单" scheme="https://coolling.github.io/tags/%E7%AE%80%E5%8D%95/"/>
+    
+    <category term="贪心" scheme="https://coolling.github.io/tags/%E8%B4%AA%E5%BF%83/"/>
     
   </entry>
   
