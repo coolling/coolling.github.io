@@ -6,7 +6,7 @@
   <link href="https://coolling.github.io/atom.xml" rel="self"/>
   
   <link href="https://coolling.github.io/"/>
-  <updated>2024-03-25T08:17:34.773Z</updated>
+  <updated>2024-03-27T16:28:58.456Z</updated>
   <id>https://coolling.github.io/</id>
   
   <author>
@@ -15,6 +15,36 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>TPDS21-EDL</title>
+    <link href="https://coolling.github.io/2024/03/28/TPDS21-EDL/"/>
+    <id>https://coolling.github.io/2024/03/28/TPDS21-EDL/</id>
+    <published>2024-03-27T16:24:39.000Z</published>
+    <updated>2024-03-27T16:28:58.456Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="Elastic-Deep-Learning-in-Multi-Tenant-GPU-Clusters"><a href="#Elastic-Deep-Learning-in-Multi-Tenant-GPU-Clusters" class="headerlink" title="Elastic Deep Learning in Multi-Tenant GPU Clusters"></a>Elastic Deep Learning in Multi-Tenant GPU Clusters</h1><p>2021 TPDS</p><h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>弹性：调整DNN作业并行度</p><p>1.负载均衡问题：GPU集群有时资源空闲有时紧张</p><p>2.基于优先级的调度：减少第优先级作业的规模</p><p>3.集群管理：减缓落后者、性能分析、worker迁移</p><h2 id="目前的解决方法"><a href="#目前的解决方法" class="headerlink" title="目前的解决方法"></a>目前的解决方法</h2><p>Stop-Resume：停下来—&gt;做检查点—-&gt;以想要的并行度启动</p><blockquote><p>需要停止 30 秒以上。耗时！</p></blockquote><h2 id="解决"><a href="#解决" class="headerlink" title="解决"></a>解决</h2><p>EDL：集群调度器和DL系统之间的轻量级协调层</p><p>1.将单机执行委托给底层 DL 系统</p><p>2.DL系统只需要从 EDL 中检索训练数据块的元数据，并在完成一个mini-batch后通知 EDL。</p><p>3.在 EDL 中，每个作业都由一组worker进程执行，每个进程都与一个 EDL 守护进程关联</p><p>4.每个进程在一个GPU上，计算minibatch中的某些样本梯度</p><p>5.每个作业都由一个领导者进程管理，并且 EDL 使用基于分布式事务的机制来快速选举领导者</p><p>6.使用stop-free扩展，允许现有worker继续训练，同时新添加的worker准备执行。</p><p>7.使用graceful exit在一个minibatch训练结束时删除worker，开销可以忽略不计。</p><p><strong>设计目标：</strong></p><blockquote><p>1.弹性</p><p>2.高效</p><p>3.一致性</p></blockquote><p><strong>优势：</strong></p><blockquote><p>1.EDL可以作为不同DL系统的简单插件并保持良好的可用性，用户只需要在代码中添加几行</p><p>2.并且EDL向用户隐藏所有细节</p><p>3.EDL相比Stop-Resume显著减少开销</p><p>4.确保任何worker随时加入&#x2F;离开工作时的正确性和效率</p></blockquote><p><strong>劣势：</strong></p><blockquote><p>只针对数据并行</p></blockquote><h2 id="EDL设计"><a href="#EDL设计" class="headerlink" title="EDL设计"></a>EDL设计</h2><p>使用NCCL、TCP通信</p><p><img src="/../images/edl/edl-1.png" alt="edl设计"></p><h2 id="自动作业管理"><a href="#自动作业管理" class="headerlink" title="自动作业管理"></a>自动作业管理</h2><p>leader选举：确保始终有一个leader来管理作业</p><p>选举之后，leader建立一个RPCserver接受连接，其他worker则连接到leader并发送注册消息来加入工作。</p><p>1.在作业执行期间，leader根据每个小批量中的梯度同步请求推断worker的活跃度，因此不需要显式的心跳消息。</p><p>2.当调用scale_out()或scale_in()时，leader与新的或退出的worker进行沟通，为他们加入或离开工作做好准备。</p><p>3.leader还构建了一个新的通信拓扑，用于现有worker的分布式训练。</p><h2 id="高效的并行性调整"><a href="#高效的并行性调整" class="headerlink" title="高效的并行性调整"></a>高效的并行性调整</h2><h3 id="scale-out"><a href="#scale-out" class="headerlink" title="scale out"></a><strong>scale out</strong></h3><p>1.上下文准备：加载动态库、准备训练数据、在GPU内存和主内存上分配空间等（占主导地位）</p><p>2.通信拓扑构建：为了通信，新的worker需要连接到leader进行协调，所有的worker需要形成一个新的环形拓扑来进行模型同步。</p><p>3.模型准备：新的worker需要在加入训练之前获得最新的模型</p><p><img src="/../images/edl/edl-2.png" alt="分析"></p><p><strong>无停止缩放</strong></p><p>当新worker进行执行上下文准备时，不需要停止对现有worker的训练。</p><p>1.每个新worker都会启动两个独立的线程，一个主线程和一个后台线程。</p><p>2.主线程进行执行上下文准备，同时后台线程进行leader发现并向leader发送注册请求。</p><p>3.leader在收到新worker的注册请求后，构建包括新worker的新通信拓扑，并将其广播给所有worker</p><p>【原来的通信拓扑还没有被破坏，因此现有的worker可以继续训练而不受影响。】</p><p>4.当新的worker完成执行上下文准备并接收到新的通信拓扑时，它会向leader发送就绪消息，但在收到来自leader的 OK 消息之前，它会被阻塞。</p><p>5.一旦收到来自所有新worker的就绪消息，leader就会向所有worker广播一条 OK 消息和未来时间戳。</p><p>6.worker在小批次结束时进行检查，并在其下一个本地时间戳达到leader指定的时间戳时切换到新的通信拓扑</p><p>7.选择一名现有worker将其模型广播给新worker</p><p>8.新worker获取最新模型后，scale_out()完成，并以新的并行度继续训练</p><p>现有的worker只需要停下来等待模型广播给新的worker，根据实验，大多数模型可以在1秒内完成</p><h3 id="scale-in"><a href="#scale-in" class="headerlink" title="scale in"></a>scale in</h3><p>1.leader构建一个新的通信拓扑并将其广播给其余的worker</p><p>2.leader也会向所有worker发送未来时间戳，此时退出的worker应离开，剩余的worker应切换到新的通信拓扑</p><p>3.如果是leader离开，之后会选一个新leader</p><h2 id="动态数据管道"><a href="#动态数据管道" class="headerlink" title="动态数据管道"></a>动态数据管道</h2><p>在弹性情况下如何为worker重新划分数据集</p><p>1.等到当前epoch结束时，重新分配worker之间的分区</p><p>这是不灵活的，因为并行度调整只能在当前epoch结束时进行</p><p>2.可以只重新分配当前epoch中未处理的分区，并在当前epoch结束时进行全局重新分配。</p><p>在为某个缩放指令重新分配时又出现另一个缩放指令又要重新分配，以及隐藏数据重新分配的延迟以及处理分区碎片或不平衡使得设计和实现变得复杂</p><p><strong>EDL使用的：</strong></p><blockquote><p>EDL 以按需方式动态地将数据分区分配给worker</p></blockquote><p><img src="/../images/edl/edl-3.png" alt="数据获取"></p><p>数据集在逻辑上分为d个分区，其中d足够大于worker的数量，同时分区的大小仍然足够大以允许高带宽批量读取数据。</p><p>分区仅在元数据级别进行，记录文件名和偏移量，数据集并没有物理分区。</p><p>leader生成分区索引的随机排列，并将其用于动态数据分配。</p><p>1.当worker需要新分区时，它向leader发送数据读取请求。</p><p>2.leader用下一个未分配分区的元数据回复请求。</p><p>3.worker 向分布式文件系统（例如 HDFS ）发出异步 I&#x2F;O 请求以读取该分区</p><p>4.为了进行进度跟踪，每个worker在其当前分区中记录一个偏移量，该偏移量指示下一个小批次应该开始的位置。worker在每个小批次结束时向leader报告其偏移量，并且该信息附加到梯度同步请求中，开销可以忽略不计。</p><p>4.当新的worker加入工作时，leader只需为他们分配一些未处理的分区。</p><p>5.当worker正常退出时，它会向leader报告当前分区的元数据及其在分区中的偏移量，以便leader可以将剩余的未处理数据分配给其他worker</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;Elastic-Deep-Learning-in-Multi-Tenant-GPU-Clusters&quot;&gt;&lt;a href=&quot;#Elastic-Deep-Learning-in-Multi-Tenant-GPU-Clusters&quot; class=&quot;headerlink&quot;</summary>
+      
+    
+    
+    
+    <category term="论文阅读" scheme="https://coolling.github.io/categories/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB/"/>
+    
+    
+    <category term="弹性训练" scheme="https://coolling.github.io/tags/%E5%BC%B9%E6%80%A7%E8%AE%AD%E7%BB%83/"/>
+    
+    <category term="TPDS" scheme="https://coolling.github.io/tags/TPDS/"/>
+    
+    <category term="21年" scheme="https://coolling.github.io/tags/21%E5%B9%B4/"/>
+    
+    <category term="数据并行" scheme="https://coolling.github.io/tags/%E6%95%B0%E6%8D%AE%E5%B9%B6%E8%A1%8C/"/>
+    
+  </entry>
   
   <entry>
     <title>518. 零钱兑换 II</title>
