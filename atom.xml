@@ -6,7 +6,7 @@
   <link href="https://coolling.github.io/atom.xml" rel="self"/>
   
   <link href="https://coolling.github.io/"/>
-  <updated>2024-04-01T09:50:40.171Z</updated>
+  <updated>2024-04-03T11:05:59.593Z</updated>
   <id>https://coolling.github.io/</id>
   
   <author>
@@ -15,6 +15,35 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>OSDI18-Gandiva</title>
+    <link href="https://coolling.github.io/2024/04/03/OSDI18-Gandiva/"/>
+    <id>https://coolling.github.io/2024/04/03/OSDI18-Gandiva/</id>
+    <published>2024-04-03T10:58:59.000Z</published>
+    <updated>2024-04-03T11:05:59.593Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="Gandiva"><a href="#Gandiva" class="headerlink" title="Gandiva"></a>Gandiva</h1><p>OSDI18</p><h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>a.深度学习作业是计算密集型的，严重依赖GPU；</p><p>b.依赖集群调度程序来确保GPU的高效利用，但是目前使用的是传统专为处理大数据作业使用的集群调度程序；</p><p>c.DLT作业被简单地视为另一个大数据作业，它在作业启动时分配一组 GPU，并在完成之前保留对其 GPU 的独占访问权</p><blockquote><p>高延迟（队头阻塞）和低利用率（作业无法充分利用其分配的 GPU）</p></blockquote><h2 id="提出"><a href="#提出" class="headerlink" title="提出"></a>提出</h2><p>Gandiva，一种新的调度框架，通过根据深度学习工作负载的独特特征定制的调度框架，可以显着提高集群效率</p><h2 id="深度学习特征"><a href="#深度学习特征" class="headerlink" title="深度学习特征"></a>深度学习特征</h2><ul><li>反馈驱动的探索</li></ul><p>用户通常会尝试一个作业的多种配置进行试错（multi-job），使用早期反馈来进行决策【称为超参数搜索，可以是手动的，也可以是自动的】</p><blockquote><p>超参数搜索通常会探索数百种超参数配置，每一轮根据早期反馈（几百个迭代）将低效的配置作业杀掉</p></blockquote><p>而确定了超参数的作业会运行数小时至数天。</p><blockquote><p><strong>这会导致队头阻塞，需要早期反馈的多项作业在队列中等待</strong></p></blockquote><ul><li>DLT作业是异构的，针对的领域不同</li></ul><p>在内存使用、GPU利用率、带宽需求、GPU之间的关联、其他作业的干扰等方面不同</p><p><img src="/../images/Gandiva/gandiva-1.png" alt="关联"></p><blockquote><p><strong>将作业视为黑匣子的传统调度程序将实现次优的集群效率</strong></p></blockquote><ul><li>作业内的可预测性</li></ul><p>一个作业由数百万个相似小批次迭代组成</p><p><img src="/../images/Gandiva/gandiva-2.png" alt="相似"></p><p>【例如，DLT 作业的 GPU RAM 使用遵循与小批次边界对齐的循环模式。前向传递期间内存增加，后向传递期间内存减少。使用的最大和最小 GPU 内存分别为 23GB 和 0.3GB，即 77 倍。该比率随小批次大小而变化】</p><blockquote><p><strong>Gandiva 利用这种循环可预测性来实现高效的应用程序感知时间切片：</strong>DLT 作业可以自动拆分为小批次迭代，并且这些 60 秒以上迭代的集合作为微任务，形成调度间隔；在内存占用最少时执行挂起，显著减小从 GPU 复制并保存在 CPU 中的内存量</p><p><strong>Gandiva使用小批次进度来不断反思其决策，以提高集群效率：</strong>将通信密集型作业动态迁移到更关联的 GPU；动态增加&#x2F;缩小作业的并行度</p></blockquote><h2 id="Gandiva设计"><a href="#Gandiva设计" class="headerlink" title="Gandiva设计"></a><strong>Gandiva设计</strong></h2><h3 id="机制"><a href="#机制" class="headerlink" title="机制"></a>机制</h3><p>a.Gandiva 允许传入作业与现有作业分时 GPU，而不是等待当前作业结束。</p><p>使用专为 DLT 作业定制的自定义<strong>挂起-恢复suspend-resume</strong>机制以及<strong>选择性打包</strong>来实现的</p><p>b.Gandiva 支持 DLT 作业从一组 GPU 高效<strong>迁移</strong>到另一组 GPU</p><p>进行碎片整理</p><p>c.Gandiva 支持 <strong>GPU 增长-收缩</strong>机制，以便可以使用空闲 GPU</p><p>d.Gandiva 通过不断<strong>分析</strong> DLT 作业的资源使用情况并评估其性能来<strong>反思</strong></p><ul><li><strong>机制1:suspend-resume</strong></li></ul><blockquote><p>利用现代操作系统支持 CPU 进程时间切片的高效挂起&#x2F;恢复，并添加了对 GPU 时间切片的自定义支持</p></blockquote><p>DLT 作业对 GPU 内存的使用具有循环模式，最小和最大内存使用量之间的差异高达 77 倍。【在 GPU 内存使用率最低时挂起作业】</p><p>（<strong>suspend-resume小模型花费小于100ms，大模型大概1s，给定 1 分钟的时间切片间隔，这相当于 2% 或更少的开销</strong>）</p><ul><li><strong>机制2:packing</strong></li></ul><p>在 GPU 上同时运行多个 DLT 作业。仅当打包的作业不超出 GPU 资源（核心、内存）并且不会相互产生不利影响时，GPU 中的打包才是高效的。</p><ul><li><strong>机制3:迁移</strong></li></ul><p>更改分配给 DLT 作业的 GPU 集</p><blockquote><p>将时间切片作业移动到集群中空出的GPU；将相互干扰的作业迁移出去；对集群进行碎片整理，以便传入的作业获得具有良好局部性的 GPU。</p></blockquote><p><strong>评估两种方法：</strong></p><p>1.<strong>通用进程迁移机制，如CRIU</strong>（<span style="color: rgb(77, 77, 77)"><span style="background-color: rgb(255, 255, 255)">可以冻结一个正在运行的程序，并且checkpoint它到一系列的文件，然后你就可以使用这些文件在任何主机重新恢复这个程序到被冻结的那个点(白话就是实现对已运行程序的备份和恢复)</span></span>）</p><p>由于 CRIU 本身不支持使用 GPU 设备的进程迁移，因此首先checkpoint GPU 对象并在调用 CRIU 之前从进程中删除所有 GPU 状态。</p><p>checkpoint大小在GB级别，单GPU迁移开销为8-10s</p><p>2.<strong>在迁移之前预热目的地并且仅迁移必要的训练状态</strong></p><p>迁移开销只需1-2s</p><blockquote><p>无论哪种方法，服务器间迁移的开销是值得的</p></blockquote><ul><li><strong>机制4:增长-收缩GPU</strong></li></ul><p>根据负载动态增加&#x2F;减少作业可用的GPU数量</p><p>仅将此机制应用于那些明确声明其足以利用这些增长GPU的 DLT 作业</p><ul><li><strong>机制5:分析</strong></li></ul><p>Gandiva 监控资源使用情况，例如 CPU 和 GPU 利用率、CPU&#x2F;GPU 内存等；<strong>内省 DLT 作业，以估计其进度</strong></p><p>Gandiva 估计 DLT 作业的小批次时间，会在调度决策之前和之后比较 DLT 的小批次时间，以确定其有效性（比如说发现打包策略低效，就不打包他们，恢复到suspend-resume机制）</p><h3 id="调度策略：怎么使用上面的机制？"><a href="#调度策略：怎么使用上面的机制？" class="headerlink" title="调度策略：怎么使用上面的机制？"></a>调度策略：怎么使用上面的机制？</h3><h4 id="术语"><a href="#术语" class="headerlink" title="术语"></a><strong>术语</strong></h4><p>作业被封装在容器中：包括所需 GPU 的数量及其优先级以及一个指示作业是否能够增长或收缩的标志</p><p>height：M&#x2F;N，M 是分配的 GPU 数量，N 是 GPU 总数。当height超过1，启动suspend-resume机制。集群的height定义为其所有服务器的最大height。</p><p>服务器的关联affinity：最初为零，如果将需要两个 GPU 的作业分配给服务器，则该服务器的关联affinity将更改为 2。调度程序使用此参数将具有相似 GPU 要求的作业分配给同一服务器。</p><h4 id="目标"><a href="#目标" class="headerlink" title="目标"></a><strong>目标</strong></h4><p>主要设计目标是为作业提供早期反馈。第二个设计目标是集群效率。</p><h4 id="两种模式"><a href="#两种模式" class="headerlink" title="两种模式"></a><strong>两种模式</strong></h4><p>可以同时在两种模式下运行</p><p><strong>1.reactive反应模式</strong>：指的是调度程序对作业到达、离开、机器故障等事件做出反应</p><p><strong>a.当新作业到达时</strong>，调度程序会为该作业分配服务器&#x2F;GPU。</p><p>Gandiva 尝试找到与新作业具有相同affinity的节点，且其height小于 1，则分配该节点。否则，Gandiva 尝试查找并分配affinity为0节点。如果没有这样的空闲服务器可用，Gandiva忽略关联性。</p><p>如果以上都没有，说明没有空闲GPU可用，则使用suspend-resume机制，如果存在具有相同affinity的节点，则使用suspend-resume，否则作业将排队</p><p><strong>b.Gandiva中，检查集群的height是否可以降低</strong></p><p>将挂起的作业迁移到新腾出的 GPU 上。</p><p><strong>2..introspective内省模式</strong>：一个连续的过程，其中调度程序旨在提高集群利用率</p><p><strong>a.packing打包</strong>，在过载时才考虑打包</p><p>如果打包作业的​​内存需求组合高于 GPU 内存，则 CPU 内存“分页”的开销会非常高 ，从而导致打包无效。</p><p>当两个或多个作业的内存需求小于 GPU 内存时，打包仍然可能不会比suspend-resume更有效。比如说作业之间的干扰。</p><p><strong>如何确定是否打包？</strong></p><blockquote><p>当作业到达时，suspend-resume模式运行，并收集分析信息（GPU 利用率、内存和作业进度）。</p><p>调度程序维护按 GPU 利用率排序的作业列表。</p><p>选择GPU利用率最低的作业将它打包在利用率最低的GPU（仅当打包作业的​​组合内存利用率不超过 GPU 的总内存时）。</p><p>当打包作业的​​总吞吐量大于时间切片模式时，打包被视为成功。如果不成功就取消打包</p></blockquote><p><strong>b.迁移</strong></p><p>使用迁移改善作业局部性</p><p><img src="/../images/Gandiva/gandiva-3.png" alt="迁移"></p><p>（三分钟后，后台训练作业 DeepSpeech 完成并释放其 8 个 GPU。）</p><p>整理资源碎片：在所有非空闲服务器中选择具有最多空闲 GPU 的服务器。将该服务器上运行的作业转移到其他服务器上。</p><p>重复此操作，直到每个非空闲服务器上的可用 GPU 数量小于阈值（在作者实验中为 4 个中的 3 个），或者没有作业将从迁移中受益。</p><p><strong>c.增长-收缩grow-shrink</strong></p><p>仅当集群未充分利用并且 DLT 作业明确将自己标识为适合增长-收缩时，才会触发增长-收缩。只会增加作业以使用单个服务器中可用的最大 GPU 数量。</p><p><strong>d.时间切片</strong></p><p>支持每个服务器中的循环调度，以公平地共享 GPU 时间</p><p>当作业具有多个优先级时，较高优先级的作业将永远不会被暂停以容纳较低优先级的作业。</p><p>如果服务器已被较高优先级作业充分利用，则较低优先级作业将迁移到另一台服务器</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;Gandiva&quot;&gt;&lt;a href=&quot;#Gandiva&quot; class=&quot;headerlink&quot; title=&quot;Gandiva&quot;&gt;&lt;/a&gt;Gandiva&lt;/h1&gt;&lt;p&gt;OSDI18&lt;/p&gt;
+&lt;h2 id=&quot;问题&quot;&gt;&lt;a href=&quot;#问题&quot; class=&quot;header</summary>
+      
+    
+    
+    
+    <category term="论文阅读" scheme="https://coolling.github.io/categories/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB/"/>
+    
+    
+    <category term="集群调度" scheme="https://coolling.github.io/tags/%E9%9B%86%E7%BE%A4%E8%B0%83%E5%BA%A6/"/>
+    
+    <category term="OSDI" scheme="https://coolling.github.io/tags/OSDI/"/>
+    
+    <category term="18年" scheme="https://coolling.github.io/tags/18%E5%B9%B4/"/>
+    
+  </entry>
   
   <entry>
     <title>331. 验证二叉树的前序序列化</title>
