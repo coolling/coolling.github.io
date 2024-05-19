@@ -6,7 +6,7 @@
   <link href="https://coolling.github.io/atom.xml" rel="self"/>
   
   <link href="https://coolling.github.io/"/>
-  <updated>2024-04-12T11:06:02.565Z</updated>
+  <updated>2024-05-19T14:25:56.677Z</updated>
   <id>https://coolling.github.io/</id>
   
   <author>
@@ -15,6 +15,34 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>NSDI24-Parcae</title>
+    <link href="https://coolling.github.io/2024/05/19/NSDI24-Parcae/"/>
+    <id>https://coolling.github.io/2024/05/19/NSDI24-Parcae/</id>
+    <published>2024-05-19T14:13:03.000Z</published>
+    <updated>2024-05-19T14:25:56.677Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="Parcae-Proactive-Liveput-Optimized-DNN-Training-on-Preemptible-Instances"><a href="#Parcae-Proactive-Liveput-Optimized-DNN-Training-on-Preemptible-Instances" class="headerlink" title="Parcae: Proactive, Liveput-Optimized DNN Training on Preemptible Instances"></a>Parcae: Proactive, Liveput-Optimized DNN Training on Preemptible Instances</h1><p>nsdi24</p><p>针对抢占式实例进行主动、Liveput 优化的 DNN 训练</p><h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>dnn越来越大–》训练越来越贵–》使用spot可抢占实例（低90%的价格）–》但是随时会被抢占怎么办</p><p><strong>以前的方法</strong></p><p>1.检查点：<strong>抢占频率</strong>高，检查点不适合</p><p>2.反应式，如bamboo 性能和可扩展性有限。很难通过管道气泡完全隐藏<strong>冗余计算的开销</strong>，特别是大模型。并且<strong>增加内存消耗</strong>，bamboo通过增加流水线深度来解决，但是这样会导致计算效率降低</p><h2 id="提出"><a href="#提出" class="headerlink" title="提出"></a>提出</h2><p><strong>parcae</strong>：主动式，在抢占之前预测资源变化，主动调整并行度</p><p><strong>新指标</strong>：<strong>liveput</strong>，测量dnn作业在各种抢占场景下的预期训练吞吐量。</p><p>（同时考虑了并行配置的吞吐量及其在抢占情况下的鲁棒性）</p><p><strong>parcae的关键见解：并行dnn训练的不同策略在抢占情况下表现出不同的鲁棒性。</strong></p><p>更长的流水线可以获得更高的吞吐量但更容易遭到抢占</p><p><img src="/../images/Parcae/parcae1.png" alt="img"></p><p><strong>如何预测？如何处理抢占？如何选择最佳并行配置？</strong></p><p>1.实例的抢占是不可知的，parcase使用两级方法来粗粒度地预测所有实例的可用性。</p><p>a.使用一个可用性预测器：输入实例的抢占和分配历史，预测近期可用实例的数量</p><p>b.蒙特卡洛抢占采样器使用预测的实例可用性对抢占进行采样</p><p>2.parcae使用轻量级实时迁移机制来处理抢占允许dnn训练在丢失实例的情况下继续进行</p><p>在每次迭代使用相同数量的样本更新模型参数，并机会性地重新排序样本来避免冗余计算或重新启动训练</p><p>3.liveput优化器将最大化liveput的问题表述为优化问题，使用新颖的动态规划算法来探索并行配置的搜索空间。</p><p><img src="/../images/Parcae/parcae2.png" alt="img"></p><h2 id="liveput指标"><a href="#liveput指标" class="headerlink" title="liveput指标"></a>liveput指标</h2><p>训练作业的liveup是其在所有可能的抢占场景下的期望吞吐量</p><p>D：数据并行数量</p><p>P：流水线阶段数目</p><p>V：抢占场景的概率分布</p><p><img src="/../images/Parcae/parcae3.png" alt="img"></p><p>V是一个D*P维的0 1向量，vk&#x3D;1代表第k个实例被抢占。其中的吞吐量计算是指发生v抢占后的新并行配置的吞吐量</p><p><strong>liveput指标和吞吐量指标的差异</strong></p><p>优势：它考虑了并行配置的性能在不同抢占场景下的变化</p><p><img src="/../images/Parcae/parcae4.png" alt="img"></p><p>吞吐量不考虑抢占的情况，因此任何场景下上图第一个都优于第二个。</p><p>较长的管道更容易受到抢占，因为单个抢占将使小批次内的这个管道失效，较短的管道在频繁的抢占下表现出更好的弹性和复原力。</p><h2 id="Parcae概述"><a href="#Parcae概述" class="headerlink" title="Parcae概述"></a>Parcae概述</h2><p><img src="/../images/Parcae/parcae5.png" alt="img"></p><p>1.使用两级方法粗粒度地预测所有实例的可用性</p><p>预测未来可用实例的数量，使用预测的可用性对抢占和分配进行采样</p><p>2.将预测的实例可用性作为输入，发现最大化liveput的并行配置</p><p>3.parcae使用3个实时迁移策略，减少开销</p><h2 id="可用性预测器"><a href="#可用性预测器" class="headerlink" title="可用性预测器"></a>可用性预测器</h2><p>1.单个实例的可用性不可预测</p><p>2.统计可用性预测</p><p>唯一可见且可靠的信息是当前用户提交的训练作业的过去抢占&#x2F;分配记录。</p><p><strong>预测的是可获得的实例数量</strong></p><p>使用过去H个时刻的可用实例数目作为输入，预测未来的可用实例数目</p><p>选择一个轻量级的自回归积分移动平均（ARIMA）算法进行预测。</p><p>从预测的可用实例数目，进一步推导出抢占或者分配数目（云不会同时分配和抢占同一个任务）</p><h2 id="实时迁移"><a href="#实时迁移" class="headerlink" title="实时迁移"></a>实时迁移</h2><p>给定抢占预测结果，Parcae可以提前安排有效的调整</p><p>1.实例抢占的影响很大程度取决于实例在数据并行和管道并行中的位置，但是在前一步的预测结果中并没有这些信息。</p><p>parcae使用概率模型来推理抢占事件到实际实例的映射</p><p><strong>抢占映射空间巨大</strong>？使用采样技术来探索映射空间并快速发现合理的准确近似值。Parcae 应用蒙特卡罗 (MC) 采样。</p><h3 id="迁移策略"><a href="#迁移策略" class="headerlink" title="迁移策略"></a>迁移策略</h3><p>三种迁移策略处理抢占：阶段内迁移、阶段间迁移和管道迁移</p><p><strong>阶段内迁移</strong>：同一阶段有相同的模型参数，当一个实例被抢占时，可以从另一个损坏的管道中的同一阶段转移可用实例</p><p><img src="/../images/Parcae/parcae6.png" alt="img"></p><p>阶段内迁移仅需更新少数实例的通信路由，并且不涉及传输参数。</p><p><strong>阶段间迁移</strong></p><p>如果阶段内迁移不行，进行阶段间迁移</p><p><img src="/../images/Parcae/parcae7.png" alt="img"></p><p>阶段间迁移需要传输模型参数</p><p><strong>管道迁移</strong></p><p><img src="/../images/Parcae/parcae8.png" alt="img"></p><p>需要重新划分模型，涉及大量的迁移开销</p><p>Parcae通过考虑当前并行配置、新的优化并行配置和实际抢占来作出迁移决策</p><p>给定预测抢占的概率映射，Parcae 自动更新最佳并行配置和迁移策略。一旦预测与实际可用性不匹配，Parcae 就会调整并行配置以及相应的迁移策略以进行适应</p><p>当抢占真正发生时，实际的迁移决策才会最终确定，Parcae 利用宽限期（例如，Azure 上的 30 秒）来执行这些迁移。</p><h2 id="liveput优化器"><a href="#liveput优化器" class="headerlink" title="liveput优化器"></a>liveput优化器</h2><p>将liveput最大化表述为一个优化问题，目标是最大化I时间间隔内的训练样本数</p><p>Parcae 使用动态规划算法来探索优化空间并发现并行配置的最佳序列</p><h2 id="异常处理"><a href="#异常处理" class="headerlink" title="异常处理"></a>异常处理</h2><p>spot实例抢占与parcae预测不匹配怎么办？</p><p>建议的并行配置与可用spot实例不兼容怎么办？</p><p><strong>并行化适配</strong></p><p>当实际可用的spot实例数目大于或者小于预测的数目，parcae会添加或删除数据并行管道，同时保留管道深度。</p><p>当可用的spot实例甚至无法制定单个管道时，它将尝试将管道重新划分为更少的阶段。</p><p><strong>容错能力</strong></p><p>如果同一阶段内所有实例都被抢占，阶段间和阶段内迁移都无法恢复该阶段的状态，parcae使用内存检查点来处理。</p><p>使用多个便宜的按需cpu实例来维护最新的模型状态，通过迭代地将梯度与spot GPU 实例同步来维护最新的检查点，以更新CPU端的模型状态</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;Parcae-Proactive-Liveput-Optimized-DNN-Training-on-Preemptible-Instances&quot;&gt;&lt;a href=&quot;#Parcae-Proactive-Liveput-Optimized-DNN-Training-</summary>
+      
+    
+    
+    
+    <category term="论文阅读" scheme="https://coolling.github.io/categories/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB/"/>
+    
+    
+    <category term="故障恢复" scheme="https://coolling.github.io/tags/%E6%95%85%E9%9A%9C%E6%81%A2%E5%A4%8D/"/>
+    
+    <category term="NSDI" scheme="https://coolling.github.io/tags/NSDI/"/>
+    
+    <category term="24年" scheme="https://coolling.github.io/tags/24%E5%B9%B4/"/>
+    
+  </entry>
   
   <entry>
     <title>2923. 找到冠军 I</title>
