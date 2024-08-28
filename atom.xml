@@ -6,7 +6,7 @@
   <link href="https://coolling.github.io/atom.xml" rel="self"/>
   
   <link href="https://coolling.github.io/"/>
-  <updated>2024-05-19T14:25:56.677Z</updated>
+  <updated>2024-08-28T14:40:26.992Z</updated>
   <id>https://coolling.github.io/</id>
   
   <author>
@@ -15,6 +15,82 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>ssh常用命令</title>
+    <link href="https://coolling.github.io/2024/08/28/ssh%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/"/>
+    <id>https://coolling.github.io/2024/08/28/ssh%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/</id>
+    <published>2024-08-28T14:14:34.000Z</published>
+    <updated>2024-08-28T14:40:26.992Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="SSH基本用法"><a href="#SSH基本用法" class="headerlink" title="SSH基本用法"></a>SSH基本用法</h1><h2 id="SSH"><a href="#SSH" class="headerlink" title="SSH"></a>SSH</h2><h3 id="远程登录服务器"><a href="#远程登录服务器" class="headerlink" title="远程登录服务器"></a>远程登录服务器</h3><p><strong>1.ssh user@hostname</strong></p><blockquote><p>user: 用户名<br>hostname: IP地址或域名</p></blockquote><p><strong>2.第一次登录时会提示：</strong></p><blockquote><p>The authenticity of host ‘123.57.47.211 (123.57.47.211)’ can’t be established.<br>ECDSA key fingerprint is SHA256:iy237yysfCe013&#x2F;l+kpDGfEG9xxHxm0dnxnAbJTPpG8.<br>Are you sure you want to continue connecting (yes&#x2F;no&#x2F;[fingerprint])?</p></blockquote><p>输入yes，然后回车即可。<br>这样会将该服务器的信息记录在~&#x2F;.ssh&#x2F;known_hosts文件中。</p><p>然后输入密码即可登录到远程服务器中。</p><p><strong>3.默认登录端口号为22</strong>。如果想登录某一特定端口：</p><blockquote><p>ssh user@hostname -p 22</p></blockquote><h3 id="配置文件"><a href="#配置文件" class="headerlink" title="配置文件"></a>配置文件</h3><p><strong>1.创建文件 ~&#x2F;.ssh&#x2F;config。</strong></p><p><strong>2.然后在文件中输入：</strong></p><blockquote><p>Host myserver1<br>    HostName IP地址或域名<br>    User 用户名</p><p>Host myserver2<br>    HostName IP地址或域名<br>    User 用户名</p></blockquote><p><strong>3.之后再使用服务器时，可以直接使用别名myserver1、myserver2。</strong></p><h3 id="密钥登录"><a href="#密钥登录" class="headerlink" title="密钥登录"></a>密钥登录</h3><p><strong>1.创建密钥：</strong></p><blockquote><p>ssh-keygen</p></blockquote><p>然后一直回车即可。</p><p>执行结束后，~&#x2F;.ssh&#x2F;目录下会多两个文件：</p><blockquote><p>id_rsa：私钥<br>id_rsa.pub：公钥</p></blockquote><p><strong>2.之后想免密码登录哪个服务器，就将公钥传给哪个服务器即可。</strong></p><p>例如，想免密登录myserver服务器。则将公钥中的内容，复制到myserver中的~&#x2F;.ssh&#x2F;authorized_keys文件里即可。</p><p><strong>3.也可以使用如下命令一键添加公钥：</strong></p><blockquote><p>ssh-copy-id myserver</p></blockquote><h3 id="执行命令"><a href="#执行命令" class="headerlink" title="执行命令"></a>执行命令</h3><p>命令格式：</p><blockquote><p>ssh user@hostname command</p></blockquote><p>例如：</p><blockquote><p>ssh user@hostname ls -a</p></blockquote><h2 id="SCP"><a href="#SCP" class="headerlink" title="SCP"></a>SCP</h2><p><strong>1.将source路径下的文件复制到destination中：</strong></p><blockquote><p>scp source destination</p></blockquote><p><strong>2.一次复制多个文件：</strong></p><blockquote><p>scp source1 source2 destination</p></blockquote><p><strong>3.复制文件夹：</strong></p><blockquote><p>scp -r ~&#x2F;tmp myserver:&#x2F;home&#x2F;acs&#x2F;<br>将本地家目录中的tmp文件夹复制到myserver服务器中的&#x2F;home&#x2F;acs&#x2F;目录下。</p></blockquote><blockquote><p>scp -r <del>&#x2F;tmp myserver:homework&#x2F;<br>将本地家目录中的tmp文件夹复制到myserver服务器中的</del>&#x2F;homework&#x2F;目录下。</p></blockquote><blockquote><p>scp -r myserver:homework .<br>将myserver服务器中的~&#x2F;homework&#x2F;文件夹复制到本地的当前路径下。</p></blockquote><p><strong>4.指定服务器的端口号：</strong></p><blockquote><p>scp -P 22 source1 source2 destination</p></blockquote><p>注意： scp的-r -P等参数尽量加在source和destination之前。</p><p><strong>5.使用scp配置其他服务器的vim和tmux</strong></p><blockquote><p>scp ~&#x2F;.vimrc ~&#x2F;.tmux.conf myserver:</p></blockquote>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;SSH基本用法&quot;&gt;&lt;a href=&quot;#SSH基本用法&quot; class=&quot;headerlink&quot; title=&quot;SSH基本用法&quot;&gt;&lt;/a&gt;SSH基本用法&lt;/h1&gt;&lt;h2 id=&quot;SSH&quot;&gt;&lt;a href=&quot;#SSH&quot; class=&quot;headerlink&quot; title=</summary>
+      
+    
+    
+    
+    <category term="linux基础" scheme="https://coolling.github.io/categories/linux%E5%9F%BA%E7%A1%80/"/>
+    
+    
+    <category term="ssh" scheme="https://coolling.github.io/tags/ssh/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>vim使用</title>
+    <link href="https://coolling.github.io/2024/08/14/vim%E4%BD%BF%E7%94%A8/"/>
+    <id>https://coolling.github.io/2024/08/14/vim%E4%BD%BF%E7%94%A8/</id>
+    <published>2024-08-14T14:57:31.000Z</published>
+    <updated>2024-08-14T14:59:49.886Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="vim使用"><a href="#vim使用" class="headerlink" title="vim使用"></a>vim使用</h1><pre><code>        功能：        (1) 命令行模式下的文本编辑器。        (2) 根据文件扩展名自动判别编程语言。支持代码缩进、代码高亮等功能。        (3) 使用方式：vim filename            如果已有该文件，则打开它。            如果没有该文件，则打开个一个新的文件，并命名为filename    模式：        (1) 一般命令模式            默认模式。命令输入方式：类似于打游戏放技能，按不同字符，即可进行不同操作。可以复制、粘贴、删除文本等。        (2) 编辑模式            在一般命令模式里按下i，会进入编辑模式。            按下ESC会退出编辑模式，返回到一般命令模式。        (3) 命令行模式            在一般命令模式里按下:/?三个字母中的任意一个，会进入命令行模式。命令行在最下面。            可以查找、替换、保存、退出、配置编辑器等。    操作：        (1) i：进入辑模式        (2) ESC：进入一般命令模式        (3) h 或 左箭头键：光标向左移动一个字符        (4) j 或 向下箭头：光标向下移动一个字符        (5) k 或 向上箭头：光标向上移动一个字符        (6) l 或 向右箭头：光标向右移动一个字符        (7) n&lt;Space&gt;：n表示数字，按下数字后再按空格，光标会向右移动这一行的n个字符        (8) 0 或 功能键[Home]：光标移动到本行开头        (9) $ 或 功能键[End]：光标移动到本行末尾        (10) G：光标移动到最后一行        (11) :n 或 nG：n为数字，光标移动到第n行        (12) gg：光标移动到第一行，相当于1G        (13) n&lt;Enter&gt;：n为数字，光标向下移动n行        (14) /word：向光标之下寻找第一个值为word的字符串。        (15) ?word：向光标之上寻找第一个值为word的字符串。        (16) n：重复前一个查找操作        (17) N：反向重复前一个查找操作        (18) :n1,n2s/word1/word2/g：n1与n2为数字，在第n1行与n2行之间寻找word1这个字符串，并将该字符串替换为word2        (19) :1,$s/word1/word2/g：将全文的word1替换为word2        (20) :1,$s/word1/word2/gc：将全文的word1替换为word2，且在替换前要求用户确认。        (21) v：选中文本        (22) d：删除选中的文本        (23) dd: 删除当前行        (24) y：复制选中的文本        (25) yy: 复制当前行        (26) p: 将复制的数据在光标的下一行/下一个位置粘贴        (27) u：撤销        (28) Ctrl + r：取消撤销        (29) 大于号 &gt;：将选中的文本整体向右缩进一次        (30) 小于号 &lt;：将选中的文本整体向左缩进一次        (31) :w 保存        (32) :w! 强制保存        (33) :q 退出        (34) :q! 强制退出        (35) :wq 保存并退出        (36) :set paste 设置成粘贴模式，取消代码自动缩进        (37) :set nopaste 取消粘贴模式，开启代码自动缩进        (38) :set nu 显示行号        (39) :set nonu 隐藏行号        (40) gg=G：将全文代码格式化        (41) :noh 关闭查找关键词高亮        (42) Ctrl + q：当vim卡死时，可以取消当前正在执行的命令    异常处理：        每次用vim编辑文件时，会自动创建一个.filename.swp的临时文件。        如果打开某个文件时，该文件的swp文件已存在，则会报错。此时解决办法有两种：            (1) 找到正在打开该文件的程序，并退出            (2) 直接删掉该swp文件即可</code></pre>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;vim使用&quot;&gt;&lt;a href=&quot;#vim使用&quot; class=&quot;headerlink&quot; title=&quot;vim使用&quot;&gt;&lt;/a&gt;vim使用&lt;/h1&gt;&lt;pre&gt;&lt;code&gt;        功能：
+        (1) 命令行模式下的文本编辑器。
+        (2) </summary>
+      
+    
+    
+    
+    <category term="linux基础" scheme="https://coolling.github.io/categories/linux%E5%9F%BA%E7%A1%80/"/>
+    
+    
+    <category term="vim" scheme="https://coolling.github.io/tags/vim/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>tmux使用</title>
+    <link href="https://coolling.github.io/2024/08/14/tmux%E4%BD%BF%E7%94%A8/"/>
+    <id>https://coolling.github.io/2024/08/14/tmux%E4%BD%BF%E7%94%A8/</id>
+    <published>2024-08-14T14:47:23.000Z</published>
+    <updated>2024-08-14T14:49:48.305Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="tmux使用"><a href="#tmux使用" class="headerlink" title="tmux使用"></a>tmux使用</h1><pre><code>功能：    (1) 分屏。    (2) 允许断开Terminal连接后，继续运行进程。结构：    一个tmux可以包含多个session，一个session可以包含多个window，一个window可以包含多个pane。    实例：        tmux:            session 0:                window 0:                    pane 0                    pane 1                    pane 2                    ...                window 1                window 2                ...            session 1            session 2            ...操作：    (1) tmux：新建一个session，其中包含一个window，window中包含一个pane，pane里打开了一个shell对话框。    (2) 按下Ctrl + a后手指松开，然后按%：将当前pane左右平分成两个pane。    (3) 按下Ctrl + a后手指松开，然后按&quot;：将当前pane上下平分成两个pane。    (4) Ctrl + d：关闭当前pane；如果当前window的所有pane均已关闭，则自动关闭window；如果当前session的所有window均已关闭，则自动关闭session。    (5) 鼠标点击可以选pane。    (6) 按下ctrl + a后手指松开，然后按方向键：选择相邻的pane。    (7) 鼠标拖动pane之间的分割线，可以调整分割线的位置。    (8) 按住ctrl + a的同时按方向键，可以调整pane之间分割线的位置。    (9) 按下ctrl + a后手指松开，然后按z：将当前pane全屏/取消全屏。    (10) 按下ctrl + a后手指松开，然后按d：挂起当前session。    (11) tmux a：打开之前挂起的session。    (12) 按下ctrl + a后手指松开，然后按s：选择其它session。        方向键 —— 上：选择上一项 session/window/pane        方向键 —— 下：选择下一项 session/window/pane        方向键 —— 右：展开当前项 session/window        方向键 —— 左：闭合当前项 session/window    (13) 按下Ctrl + a后手指松开，然后按c：在当前session中创建一个新的window。    (14) 按下Ctrl + a后手指松开，然后按w：选择其他window，操作方法与(12)完全相同。    (15) 按下Ctrl + a后手指松开，然后按PageUp：翻阅当前pane内的内容。    (16) 鼠标滚轮：翻阅当前pane内的内容。    (17) 在tmux中选中文本时，需要按住shift键。（仅支持Windows和Linux，不支持Mac，不过该操作并不是必须的，因此影响不大）    (18) tmux中复制/粘贴文本的通用方式：        (1) 按下Ctrl + a后松开手指，然后按[        (2) 用鼠标选中文本，被选中的文本会被自动复制到tmux的剪贴板        (3) 按下Ctrl + a后松开手指，然后按]，会将剪贴板中的内容粘贴到光标处</code></pre>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;tmux使用&quot;&gt;&lt;a href=&quot;#tmux使用&quot; class=&quot;headerlink&quot; title=&quot;tmux使用&quot;&gt;&lt;/a&gt;tmux使用&lt;/h1&gt;&lt;pre&gt;&lt;code&gt;功能：
+    (1) 分屏。
+    (2) 允许断开Terminal连接后，继续运行进程</summary>
+      
+    
+    
+    
+    <category term="linux基础" scheme="https://coolling.github.io/categories/linux%E5%9F%BA%E7%A1%80/"/>
+    
+    
+    <category term="tmux" scheme="https://coolling.github.io/tags/tmux/"/>
+    
+  </entry>
   
   <entry>
     <title>NSDI24-Parcae</title>
@@ -501,54 +577,6 @@
     <category term="中等" scheme="https://coolling.github.io/tags/%E4%B8%AD%E7%AD%89/"/>
     
     <category term="贪心" scheme="https://coolling.github.io/tags/%E8%B4%AA%E5%BF%83/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>2864.最大二进制奇数</title>
-    <link href="https://coolling.github.io/2024/03/13/%E6%9C%80%E5%A4%A7%E4%BA%8C%E8%BF%9B%E5%88%B6%E5%A5%87%E6%95%B0/"/>
-    <id>https://coolling.github.io/2024/03/13/%E6%9C%80%E5%A4%A7%E4%BA%8C%E8%BF%9B%E5%88%B6%E5%A5%87%E6%95%B0/</id>
-    <published>2024-03-13T10:23:33.000Z</published>
-    <updated>2024-03-17T13:17:35.012Z</updated>
-    
-    <content type="html"><![CDATA[<h2 id="2864-最大二进制奇数"><a href="#2864-最大二进制奇数" class="headerlink" title="2864.最大二进制奇数"></a>2864.最大二进制奇数</h2><h3 id="题目："><a href="#题目：" class="headerlink" title="题目："></a>题目：</h3><p>给你一个 <strong>二进制</strong> 字符串 <code>s</code> ，其中至少包含一个 <code>&#39;1&#39;</code> 。</p><p>你必须按某种方式 <strong>重新排列</strong> 字符串中的位，使得到的二进制数字是可以由该组合生成的 <strong>最大二进制奇数</strong> 。</p><p>以字符串形式，表示并返回可以由给定组合生成的最大二进制奇数。</p><p><strong>注意</strong> 返回的结果字符串 <strong>可以</strong> 含前导零。</p><p><strong>示例 1：</strong></p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">输入：s = &quot;010&quot;</span><br><span class="line">输出：&quot;001&quot;</span><br><span class="line">解释：因为字符串 s 中仅有一个 &#x27;1&#x27; ，其必须出现在最后一位上。所以答案是 &quot;001&quot; 。</span><br></pre></td></tr></table></figure><p><strong>示例 2：</strong></p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">输入：s = &quot;0101&quot;</span><br><span class="line">输出：&quot;1001&quot;</span><br><span class="line">解释：其中一个 &#x27;1&#x27; 必须出现在最后一位上。而由剩下的数字可以生产的最大数字是 &quot;100&quot; 。所以答案是 &quot;1001&quot; 。</span><br></pre></td></tr></table></figure><h3 id="解题思路"><a href="#解题思路" class="headerlink" title="解题思路"></a>解题思路</h3><p>要获得最大的二进制数思路，只需要将原来二进制串中的 ’1‘都移到最前面。但是要的是奇数，所以要留一个’1‘在二进制串的最后面。</p><h3 id="答案"><a href="#答案" class="headerlink" title="答案"></a>答案</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;string&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function">string <span class="title">maximumOddBinaryNumber</span><span class="params">(string s)</span> </span>&#123;</span><br><span class="line">        <span class="type">int</span> len =s.<span class="built_in">size</span>();</span><br><span class="line">        </span><br><span class="line">        string res=<span class="string">&quot;&quot;</span>;</span><br><span class="line">        <span class="type">int</span> count1=<span class="number">0</span>;</span><br><span class="line">      <span class="comment">// 获取字符串中1的个数</span></span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">auto</span> ch : s)&#123;</span><br><span class="line">            count1+=ch-<span class="string">&#x27;0&#x27;</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 将‘1’放到前面</span></span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;count1<span class="number">-1</span>;i++)&#123;</span><br><span class="line">            res+=<span class="string">&#x27;1&#x27;</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;len-count1;i++)&#123;</span><br><span class="line">            res+=<span class="string">&quot;0&quot;</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 留一个‘1’在最后 确保是奇数</span></span><br><span class="line">        res+=<span class="string">&quot;1&quot;</span>;</span><br><span class="line">        <span class="keyword">return</span> res;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure><p>好久没有写c++了，对一些语法生疏了起来，看了题解，可以用更简洁的代码来完成</p><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function">string <span class="title">maximumOddBinaryNumber</span><span class="params">(string s)</span> </span>&#123;</span><br><span class="line">      <span class="comment">// algorithm头文件定义了一个count的函数。这个函数使用一对迭代器和一个值做参数，返回这个值出现次数的统计结果。</span></span><br><span class="line">        <span class="type">int</span> cnt = <span class="built_in">count</span>(s.<span class="built_in">begin</span>(), s.<span class="built_in">end</span>(), <span class="string">&#x27;1&#x27;</span>);</span><br><span class="line">        <span class="comment">// string(size_type n,char c) ：创建一个包含 n 个元素的 string 对象，其中每个元素都被初始化为字符 c</span></span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">string</span>(cnt - <span class="number">1</span>, <span class="string">&#x27;1&#x27;</span>) + <span class="built_in">string</span>(s.<span class="built_in">length</span>() - cnt, <span class="string">&#x27;0&#x27;</span>) + <span class="string">&#x27;1&#x27;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br></pre></td></tr></table></figure><p>作者：力扣官方题解<br>链接：<a href="https://leetcode.cn/problems/maximum-odd-binary-number/solutions/2679827/zui-da-de-er-jin-zhi-qi-shu-by-leetcode-1mi14/">https://leetcode.cn/problems/maximum-odd-binary-number/solutions/2679827/zui-da-de-er-jin-zhi-qi-shu-by-leetcode-1mi14/</a></p>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;h2 id=&quot;2864-最大二进制奇数&quot;&gt;&lt;a href=&quot;#2864-最大二进制奇数&quot; class=&quot;headerlink&quot; title=&quot;2864.最大二进制奇数&quot;&gt;&lt;/a&gt;2864.最大二进制奇数&lt;/h2&gt;&lt;h3 id=&quot;题目：&quot;&gt;&lt;a href=&quot;#题目：&quot; class</summary>
-      
-    
-    
-    
-    <category term="算法" scheme="https://coolling.github.io/categories/%E7%AE%97%E6%B3%95/"/>
-    
-    
-    <category term="每日一题" scheme="https://coolling.github.io/tags/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/"/>
-    
-    <category term="简单" scheme="https://coolling.github.io/tags/%E7%AE%80%E5%8D%95/"/>
-    
-    <category term="贪心" scheme="https://coolling.github.io/tags/%E8%B4%AA%E5%BF%83/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Hello World</title>
-    <link href="https://coolling.github.io/2024/03/13/hello-world/"/>
-    <id>https://coolling.github.io/2024/03/13/hello-world/</id>
-    <published>2024-03-13T09:49:05.899Z</published>
-    <updated>2024-03-13T09:49:05.899Z</updated>
-    
-    <content type="html"><![CDATA[<p>Welcome to <a href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p><h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/writing.html">Writing</a></p><h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/server.html">Server</a></p><h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/generating.html">Generating</a></p><h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;p&gt;Welcome to &lt;a href=&quot;https://hexo.io/&quot;&gt;Hexo&lt;/a&gt;! This is your very first post. Check &lt;a href=&quot;https://hexo.io/docs/&quot;&gt;documentation&lt;/a&gt; for</summary>
-      
-    
-    
-    
     
   </entry>
   

@@ -1,3 +1,6 @@
+https://coolling.github.io/2024/08/28/ssh%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/
+https://coolling.github.io/2024/08/14/vim%E4%BD%BF%E7%94%A8/
+https://coolling.github.io/2024/08/14/tmux%E4%BD%BF%E7%94%A8/
 https://coolling.github.io/2024/05/19/NSDI24-Parcae/
 https://coolling.github.io/2024/04/12/2923-%E6%89%BE%E5%88%B0%E5%86%A0%E5%86%9B-I/
 https://coolling.github.io/2024/04/03/OSDI18-Gandiva/
@@ -54,5 +57,9 @@ https://coolling.github.io/tags/TPDS/
 https://coolling.github.io/tags/21%E5%B9%B4/
 https://coolling.github.io/tags/PPoPP/
 https://coolling.github.io/tags/%E6%97%A5%E5%BF%97/
+https://coolling.github.io/tags/ssh/
+https://coolling.github.io/tags/tmux/
+https://coolling.github.io/tags/vim/
 https://coolling.github.io/categories/%E7%AE%97%E6%B3%95/
 https://coolling.github.io/categories/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB/
+https://coolling.github.io/categories/linux%E5%9F%BA%E7%A1%80/
