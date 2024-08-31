@@ -6,7 +6,7 @@
   <link href="https://coolling.github.io/atom.xml" rel="self"/>
   
   <link href="https://coolling.github.io/"/>
-  <updated>2024-08-28T14:40:26.992Z</updated>
+  <updated>2024-08-31T10:46:46.066Z</updated>
   <id>https://coolling.github.io/</id>
   
   <author>
@@ -15,6 +15,30 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>git</title>
+    <link href="https://coolling.github.io/2024/08/31/git/"/>
+    <id>https://coolling.github.io/2024/08/31/git/</id>
+    <published>2024-08-31T10:44:39.000Z</published>
+    <updated>2024-08-31T10:46:46.066Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="git使用"><a href="#git使用" class="headerlink" title="git使用"></a>git使用</h1><h2 id="git基本概念"><a href="#git基本概念" class="headerlink" title="git基本概念"></a>git基本概念</h2><ul><li>工作区：仓库的目录。工作区是独立于各个分支的。</li><li>暂存区：数据暂时存放的区域，类似于工作区写入版本库前的缓存区。暂存区是独立于各个分支的。</li><li>版本库：存放所有已经提交到本地仓库的代码版本</li><li>版本结构：树结构，树中每个节点代表一个代码版本。</li></ul><h2 id="git常用命令"><a href="#git常用命令" class="headerlink" title="git常用命令"></a>git常用命令</h2><ol><li>git config –global user.name xxx：设置全局用户名，信息记录在~&#x2F;.gitconfig文件中</li><li>git config –global user.email <a href="mailto:&#120;&#x78;&#120;&#64;&#x78;&#120;&#120;&#46;&#x63;&#x6f;&#109;">&#120;&#x78;&#120;&#64;&#x78;&#120;&#120;&#46;&#x63;&#x6f;&#109;</a>：设置全局邮箱地址，信息记录在~&#x2F;.gitconfig文件中</li><li>git init：将当前目录配置成git仓库，信息记录在隐藏的.git文件夹中</li><li>git add XX：将XX文件添加到暂存区</li><li>git add .：将所有待加入暂存区的文件加入暂存区</li><li>git rm –cached XX：将文件从仓库索引目录中删掉</li><li>git commit -m “给自己看的备注信息”：将暂存区的内容提交到当前分支</li><li>git status：查看仓库状态</li><li>git diff XX：查看XX文件相对于暂存区修改了哪些内容</li><li>git log：查看当前分支的所有版本</li><li>git reflog：查看HEAD指针的移动历史（包括被回滚的版本）</li><li>git reset –hard HEAD^ 或 git reset –hard HEAD~：将代码库回滚到上一个版本</li><li>git reset –hard HEAD^^：往上回滚两次，以此类推</li><li>git reset –hard HEAD~100：往上回滚100个版本</li><li>git reset –hard 版本号：回滚到某一特定版本</li><li>git checkout — XX或git restore XX：将XX文件尚未加入暂存区的修改全部撤销</li><li>git remote add origin <a href="mailto:&#x67;&#105;&#x74;&#64;&#x67;&#105;&#x74;&#46;&#x61;&#99;&#119;&#105;&#110;&#x67;&#x2e;&#99;&#111;&#x6d;">&#x67;&#105;&#x74;&#64;&#x67;&#105;&#x74;&#46;&#x61;&#99;&#119;&#105;&#110;&#x67;&#x2e;&#99;&#111;&#x6d;</a>:xxx&#x2F;XXX.git：将本地仓库关联到远程仓库</li><li>git push -u (第一次需要-u以后不需要)：将当前分支推送到远程仓库</li><li>git push origin branch_name：将本地的某个分支推送到远程仓库</li><li>git clone <a href="mailto:&#x67;&#105;&#x74;&#x40;&#x67;&#x69;&#116;&#46;&#97;&#x63;&#119;&#105;&#110;&#x67;&#x2e;&#x63;&#x6f;&#109;">&#x67;&#105;&#x74;&#x40;&#x67;&#x69;&#116;&#46;&#97;&#x63;&#119;&#105;&#110;&#x67;&#x2e;&#x63;&#x6f;&#109;</a>:xxx&#x2F;XXX.git：将远程仓库XXX下载到当前目录下</li><li>git checkout -b branch_name：创建并切换到branch_name这个分支</li><li>git branch：查看所有分支和当前所处分支</li><li>git checkout branch_name：切换到branch_name这个分支</li><li>git merge branch_name：将分支branch_name合并到当前分支上</li><li>git branch -d branch_name：删除本地仓库的branch_name分支</li><li>git branch branch_name：创建新分支</li><li>git push –set-upstream origin branch_name：设置本地的branch_name分支对应远程仓库的branch_name分支</li><li>git push -d origin branch_name：删除远程仓库的branch_name分支</li><li>git pull：将远程仓库的当前分支与本地仓库的当前分支合并</li><li>git pull origin branch_name：将远程仓库的branch_name分支与本地仓库的当前分支合并</li><li>git branch –set-upstream-to&#x3D;origin&#x2F;branch_name1 branch_name2：将远程的branch_name1分支与本地的branch_name2分支对应</li><li>git checkout -t origin&#x2F;branch_name 将远程的branch_name分支拉取到本地</li><li>git stash：将工作区和暂存区中尚未提交的修改存入栈中</li><li>git stash apply：将栈顶存储的修改恢复到当前分支，但不删除栈顶元素</li><li>git stash drop：删除栈顶存储的修改</li><li>git stash pop：将栈顶存储的修改恢复到当前分支，同时删除栈顶元素</li><li>git stash list：查看栈中所有元素</li></ol>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;git使用&quot;&gt;&lt;a href=&quot;#git使用&quot; class=&quot;headerlink&quot; title=&quot;git使用&quot;&gt;&lt;/a&gt;git使用&lt;/h1&gt;&lt;h2 id=&quot;git基本概念&quot;&gt;&lt;a href=&quot;#git基本概念&quot; class=&quot;headerlink&quot; title=</summary>
+      
+    
+    
+    
+    <category term="linux基础" scheme="https://coolling.github.io/categories/linux%E5%9F%BA%E7%A1%80/"/>
+    
+    
+    <category term="git" scheme="https://coolling.github.io/tags/git/"/>
+    
+  </entry>
   
   <entry>
     <title>ssh常用命令</title>
@@ -549,34 +573,6 @@
     <category term="动态规划" scheme="https://coolling.github.io/tags/%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/"/>
     
     <category term="bfs" scheme="https://coolling.github.io/tags/bfs/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>2789.合并后数组中的最大元素</title>
-    <link href="https://coolling.github.io/2024/03/14/2789-%E5%90%88%E5%B9%B6%E5%90%8E%E6%95%B0%E7%BB%84%E4%B8%AD%E7%9A%84%E6%9C%80%E5%A4%A7%E5%85%83%E7%B4%A0/"/>
-    <id>https://coolling.github.io/2024/03/14/2789-%E5%90%88%E5%B9%B6%E5%90%8E%E6%95%B0%E7%BB%84%E4%B8%AD%E7%9A%84%E6%9C%80%E5%A4%A7%E5%85%83%E7%B4%A0/</id>
-    <published>2024-03-14T09:12:09.000Z</published>
-    <updated>2024-03-17T13:17:40.372Z</updated>
-    
-    <content type="html"><![CDATA[<h2 id="2789-合并后数组中的最大元素"><a href="#2789-合并后数组中的最大元素" class="headerlink" title="2789.合并后数组中的最大元素"></a>2789.合并后数组中的最大元素</h2><h3 id="题目："><a href="#题目：" class="headerlink" title="题目："></a>题目：</h3><p>给你一个下标从 <strong>0</strong> 开始、由正整数组成的数组 <code>nums</code> 。</p><p>你可以在数组上执行下述操作 <strong>任意</strong> 次：</p><ul><li>选中一个同时满足 <code>0 &lt;= i &lt; nums.length - 1</code> 和 <code>nums[i] &lt;= nums[i + 1]</code> 的整数 <code>i</code> 。将元素 <code>nums[i + 1]</code> 替换为 <code>nums[i] + nums[i + 1]</code> ，并从数组中删除元素 <code>nums[i]</code> 。</li></ul><p>返回你可以从最终数组中获得的 <strong>最大</strong> 元素的值。</p><p><strong>示例 1：</strong></p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">输入：nums = [2,3,7,9,3]</span><br><span class="line">输出：21</span><br><span class="line">解释：我们可以在数组上执行下述操作：</span><br><span class="line">- 选中 i = 0 ，得到数组 nums = [5,7,9,3] 。</span><br><span class="line">- 选中 i = 1 ，得到数组 nums = [5,16,3] 。</span><br><span class="line">- 选中 i = 0 ，得到数组 nums = [21,3] 。</span><br><span class="line">最终数组中的最大元素是 21 。可以证明我们无法获得更大的元素。</span><br></pre></td></tr></table></figure><p><strong>示例 2：</strong></p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">输入：nums = [5,3,3]</span><br><span class="line">输出：11</span><br><span class="line">解释：我们可以在数组上执行下述操作：</span><br><span class="line">- 选中 i = 1 ，得到数组 nums = [5,6] 。</span><br><span class="line">- 选中 i = 0 ，得到数组 nums = [11] 。</span><br><span class="line">最终数组中只有一个元素，即 11 。</span><br></pre></td></tr></table></figure><p><strong>提示：</strong></p><ul><li><code>1 &lt;= nums.length &lt;= 10^5</code></li><li><code>1 &lt;= nums[i] &lt;= 10^6</code></li></ul><h3 id="解题思路"><a href="#解题思路" class="headerlink" title="解题思路"></a>解题思路</h3><p>首先，因为nums的长度可以到10^5^，每个数最大 10^6^，因此结果最大可到 10^11^，因此使用<code>long long</code>类型。</p><p>为了求得合并后的最大数字，我们想要尽可能地多合并几次。很显然，应该从后面往前合并比较合适。</p><p>（1）因此如果前面几个比较小的数字合并起来超过了后面原本比他们都大的某个数，后面的数字就无法往前合并了。</p><p>（2）而我们从后面往前面合并的话，合并的条件是<code>nums[i] &lt;= nums[i + 1]</code>，从后面开始合并<code>nums[i + 1]</code>只会大于等于未合并前的数字，不会影响本来可以合并的情况。</p><h3 id="答案"><a href="#答案" class="headerlink" title="答案"></a>答案</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">long</span> <span class="type">long</span> <span class="title">maxArrayValue</span><span class="params">(vector&lt;<span class="type">int</span>&gt;&amp; nums)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//1 &lt;= nums.length &lt;= 105</span></span><br><span class="line">        <span class="comment">//1 &lt;= nums[i] &lt;= 106</span></span><br><span class="line">        <span class="comment">//所以要考虑10的11次方的大小，应该用long long</span></span><br><span class="line">        <span class="type">long</span> <span class="type">long</span> max=<span class="number">0</span>;</span><br><span class="line">        <span class="type">int</span> size=nums.<span class="built_in">size</span>();</span><br><span class="line">        <span class="type">long</span> <span class="type">long</span> now=nums[size<span class="number">-1</span>];</span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> i=size<span class="number">-1</span>;i&gt;<span class="number">0</span>;--i)</span><br><span class="line">            <span class="keyword">if</span>(now&gt;=nums[i<span class="number">-1</span>])</span><br><span class="line">                now+=nums[i<span class="number">-1</span>];</span><br><span class="line">            <span class="keyword">else</span>&#123;</span><br><span class="line">                <span class="keyword">if</span>(now&gt;max)</span><br><span class="line">                    max=now;</span><br><span class="line">                now=nums[i<span class="number">-1</span>];</span><br><span class="line">            &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span>(now&gt;max)</span><br><span class="line">            max=now;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> max;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure><p>还是贴上官方解答，写的比我简洁多了，学习一下</p><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">long</span> <span class="type">long</span> <span class="title">maxArrayValue</span><span class="params">(vector&lt;<span class="type">int</span>&gt;&amp; nums)</span> </span>&#123;</span><br><span class="line">        <span class="type">long</span> <span class="type">long</span> sum = nums.<span class="built_in">back</span>();</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = nums.<span class="built_in">size</span>() - <span class="number">2</span>; i &gt;= <span class="number">0</span>; i--) &#123;</span><br><span class="line">            sum = nums[i] &lt;= sum ? nums[i] + sum : nums[i];</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> sum;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure><p>作者：力扣官方题解<br>链接：<a href="https://leetcode.cn/problems/largest-element-in-an-array-after-merge-operations/submissions/511757169/">https://leetcode.cn/problems/largest-element-in-an-array-after-merge-operations/submissions/511757169/</a></p>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;h2 id=&quot;2789-合并后数组中的最大元素&quot;&gt;&lt;a href=&quot;#2789-合并后数组中的最大元素&quot; class=&quot;headerlink&quot; title=&quot;2789.合并后数组中的最大元素&quot;&gt;&lt;/a&gt;2789.合并后数组中的最大元素&lt;/h2&gt;&lt;h3 id=&quot;题目：&quot;&gt;&lt;a h</summary>
-      
-    
-    
-    
-    <category term="算法" scheme="https://coolling.github.io/categories/%E7%AE%97%E6%B3%95/"/>
-    
-    
-    <category term="每日一题" scheme="https://coolling.github.io/tags/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/"/>
-    
-    <category term="中等" scheme="https://coolling.github.io/tags/%E4%B8%AD%E7%AD%89/"/>
-    
-    <category term="贪心" scheme="https://coolling.github.io/tags/%E8%B4%AA%E5%BF%83/"/>
     
   </entry>
   
