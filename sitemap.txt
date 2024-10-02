@@ -1,3 +1,4 @@
+https://coolling.github.io/2024/10/02/%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%921/
 https://coolling.github.io/2024/10/01/%E9%93%BE%E8%A1%A85/
 https://coolling.github.io/2024/09/29/%E6%8A%80%E5%B7%A71/
 https://coolling.github.io/2024/09/29/%E9%93%BE%E8%A1%A84/
@@ -72,12 +73,12 @@ https://coolling.github.io/tags/git/
 https://coolling.github.io/tags/PPoPP/
 https://coolling.github.io/tags/%E6%97%A5%E5%BF%97/
 https://coolling.github.io/tags/ssh/
+https://coolling.github.io/tags/tmux/
 https://coolling.github.io/tags/vim/
 https://coolling.github.io/tags/%E6%8A%80%E5%B7%A7/
 https://coolling.github.io/tags/%E6%BB%91%E5%8A%A8%E7%AA%97%E5%8F%A3/
 https://coolling.github.io/tags/%E9%93%BE%E8%A1%A8/
 https://coolling.github.io/tags/%E5%BD%92%E5%B9%B6%E6%8E%92%E5%BA%8F/
-https://coolling.github.io/tags/tmux/
 https://coolling.github.io/categories/%E7%AE%97%E6%B3%95/
 https://coolling.github.io/categories/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB/
 https://coolling.github.io/categories/linux%E5%9F%BA%E7%A1%80/
